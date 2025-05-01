@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Group Project</string>
+    <string name="tasks">Tasks</string>
+    <string name="date_range">Date Range</string>
 </resources>
