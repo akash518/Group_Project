@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<!--    Title-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/title"
+
+        android:text="@string/tasks"
+        android:textSize="36sp"
+        android:textStyle="bold"
+
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="20dp"
+        android:gravity="center" />
+
+<!--    Open tasks button-->
+<!--    TODO: Change from text to image-->
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="60dp"
+        android:id="@+id/openTasks"
+
+        android:text=">"
+        android:textSize="36sp"
+        android:textColor="@color/black"
+        android:background="@android:color/transparent"
+
+        android:layout_alignBaseline="@id/title"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="20dp"/>
+
+<!--    Week-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:id="@+id/dateRange"
+
+        android:text="@string/date_range"
+        android:textSize="20sp"
+        android:textStyle="bold"
+
+        android:gravity="center"
+        android:layout_below="@id/title"
+        android:layout_alignStart="@id/title"
+        android:layout_marginTop="3dp"/>
+<!--    <LinearLayout-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="48dp"-->
+<!--        android:id="@+id/dateRange"-->
+<!--        android:layout_below="@id/title"-->
+<!--        android:layout_alignStart="@id/title">-->
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:id="@+id/leftArrow"-->
+
+<!--            android:text="@string/left"-->
+<!--            android:textSize="20sp"-->
+<!--            android:padding="4dp"-->
+<!--            android:gravity="center"/>-->
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:id="@+id/week"-->
+
+<!--            android:text="@string/date_range"-->
+<!--            android:textSize="20sp"-->
+<!--            android:textStyle="bold"-->
+
+<!--            android:gravity="center"-->
+<!--            android:layout_below="@id/title"-->
+<!--            android:layout_alignStart="@id/title"-->
+<!--            android:layout_marginTop="3dp"/>-->
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:id="@+id/rightArrow"-->
+
+<!--            android:text="@string/right"-->
+<!--            android:textSize="20sp"-->
+<!--            android:padding="4dp"-->
+<!--            android:gravity="center"/>-->
+<!--    </LinearLayout>-->
+
+<!--    Course list-->
+    <Spinner
+        android:layout_width="150dp"
+        android:layout_height="48dp"
+        android:id="@+id/courses"
+
+        android:spinnerMode="dropdown"
+
+        android:layout_below="@id/title"
+        android:layout_marginTop="5dp"
+        android:layout_alignEnd="@id/openTasks"
+        android:layout_alignBottom="@id/dateRange"
+        android:layout_marginEnd="10dp" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+
+        android:layout_below="@id/dateRange"
+        android:layout_marginTop="10dp"
+        android:layout_alignStart="@id/dateRange"
+        android:layout_alignEnd="@id/courses" />
+
+    <com.example.groupproject.ProgressView
+        android:id="@+id/progressRings"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_below="@id/dateRange"
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/progressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/baseProgress"
+        android:textSize="15sp"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:layout_centerHorizontal="true"
+        android:layout_alignTop="@id/progressRings"
+        android:layout_marginTop="110dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:id="@+id/taskView"
+
+        android:layout_below="@id/progressRings"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp" />
+
+    <Button
+        android:layout_width="160dp"
+        android:layout_height="60dp"
+        android:id="@+id/addCourse"
+
+        android:text="@string/add_course"
+        android:textSize="18sp"
+        android:background="@drawable/square_button"
+
+        android:layout_below="@id/taskView"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp" />
+
+    <Button
+        android:layout_width="160dp"
+        android:layout_height="60dp"
+        android:id="@+id/createTask"
+
+        android:text="@string/create_task"
+        android:textSize="18sp"
+        android:background="@drawable/square_button"
+
+        android:layout_below="@id/taskView"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="20dp"/>
+</RelativeLayout>
