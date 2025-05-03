@@ -16,20 +16,13 @@ data class CourseProgress(val courseId: String, val progress: Float)
 
 class ProgressView(context: Context, attrs: AttributeSet? = null): View(context, attrs) {
     private var courses = listOf<CourseProgress>()
-    private val ringWidth = 40f
-    private val spacing = 15f
+    private var ringWidth = 100f
+    private var spacing = 15f
 
-    private val courseColors = listOf(
-        Color.parseColor("#E53935"), // Red
-        Color.parseColor("#FB8C00"), // Orange
-        Color.parseColor("#43A047"), // Green
-        Color.parseColor("#1E88E5"), // Blue
-        Color.parseColor("#8E24AA"), // Purple
-        Color.parseColor("#00897B"), // Teal
-        Color.parseColor("#FDD835"), // Yellow
-    )
+    private var courseColors: Map<String, Int> = emptyMap()
 
     private var currentProgress = listOf<CourseProgress>()
+    private var selectedCourseId: String? = null
 
     fun updateProgress(newList: List<CourseProgress>) {
         Log.d("HomeActivity", "updateProgress called with ${newList.size} courses")
@@ -60,6 +53,15 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         currentProgress = newList
     }
 
+    fun setSelectedCourse(courseId: String?) {
+        selectedCourseId = courseId
+        invalidate()
+    }
+
+    fun setCourseColors(colors: Map<String, Int>) {
+        courseColors = colors
+        invalidate()
+    }
 
     override fun onDraw(canvas: Canvas) {
 //        Log.w("HomeActivity", "onDraw")
@@ -68,12 +70,27 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         super.onDraw(canvas)
         val centerX = width / 2f
         val centerY = height / 2f
-        var radius = (min(width, height) / 2f) - ringWidth
+//        var radius = (min(width, height) / 4f) - ringWidth
+        val availableRadius = (min(width, height) / 3f) - 60
+        val numberOfCourses = courses.size
+        val totalSpacing = (numberOfCourses - 1) * spacing
+        val maxWidth = availableRadius - totalSpacing
+
+        ringWidth = if(numberOfCourses == 1) (100f) else maxWidth / numberOfCourses
+        var radius = if (numberOfCourses == 1) (availableRadius) else ringWidth * numberOfCourses + spacing * (numberOfCourses - 1)
+        val isAllCourses = selectedCourseId == null
+//        Log.d("ProgressView", "Radius: $radius")
+//        Log.d("ProgressView", "Available Radius: $availableRadius")
+//        Log.d("ProgressView", "Total Courses: $numberOfCourses")
+//        Log.d("ProgressView", "Total Spacing: $totalSpacing")
+//        Log.d("ProgressView", "Max Width: $maxWidth")
+//        Log.d("ProgressView", "Ring Width: $ringWidth")
 
         for (i in courses.indices) {
             val course = courses[i]
+            val isSelected = isAllCourses || course.courseId == selectedCourseId
 
-            val paint = Paint().apply {
+            val basePaint = Paint().apply {
                 style = Paint.Style.STROKE
                 color = Color.LTGRAY
                 strokeWidth = ringWidth
@@ -83,17 +100,23 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
             val progressPaint = Paint().apply {
                 style = Paint.Style.STROKE
                 strokeCap = Paint.Cap.ROUND
-                color = courseColors[i % courseColors.size]
+                color = if (isSelected) {
+                    courseColors[course.courseId] ?: Color.LTGRAY
+                } else {
+                    Color.LTGRAY
+                }
                 strokeWidth = ringWidth
                 isAntiAlias = true
             }
 
             val rect = RectF(centerX - radius, centerY - radius, centerX + radius, centerY + radius)
 
-            canvas.drawArc(rect, 0f, 360f, false, paint)
-            canvas.drawArc(rect, -90f, 360f * course.progress, false, progressPaint)
+            canvas.drawArc(rect, 0f, 360f, false, basePaint)
+            if (course.progress > 0f) {
+                canvas.drawArc(rect, -90f, 360f * course.progress, false, progressPaint)
+            }
 
-            radius -= (ringWidth + spacing)
+            radius += (ringWidth + spacing)
         }
     }
 }
