@@ -26,6 +26,7 @@
         </activity>
         <activity android:name=".HomeActivity" />
         <activity android:name=".CreateAccount" />
+        <activity android:name=".PomodoroActivity" />
     </application>
 
 </manifest>
