@@ -3,35 +3,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<!--    Title-->
-    <TextView
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/title"
-
-        android:text="@string/tasks"
-        android:textSize="36sp"
-        android:textStyle="bold"
-
         android:layout_marginTop="10dp"
         android:layout_marginStart="20dp"
-        android:gravity="center" />
+        android:layout_marginEnd="20dp"
+        android:id="@+id/TitleMenuBar">
 
-<!--    Open tasks button-->
-<!--    TODO: Change from text to image-->
-    <Button
-        android:layout_width="70dp"
-        android:layout_height="60dp"
-        android:id="@+id/openTasks"
+        <!--    Title-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/title"
 
-        android:text=">"
-        android:textSize="36sp"
-        android:textColor="@color/black"
-        android:background="@android:color/transparent"
+            android:text="@string/tasks"
+            android:textSize="36sp"
+            android:textStyle="bold"
 
-        android:layout_alignBaseline="@id/title"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="20dp"/>
+            android:gravity="center" />
+
+        <ImageButton
+            android:id="@+id/menu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_menu"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/menu"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
 
 <!--    Week-->
     <TextView
@@ -44,50 +44,9 @@
         android:textStyle="bold"
 
         android:gravity="center"
-        android:layout_below="@id/title"
-        android:layout_alignStart="@id/title"
+        android:layout_below="@id/TitleMenuBar"
+        android:layout_alignStart="@id/TitleMenuBar"
         android:layout_marginTop="3dp"/>
-<!--    <LinearLayout-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="48dp"-->
-<!--        android:id="@+id/dateRange"-->
-<!--        android:layout_below="@id/title"-->
-<!--        android:layout_alignStart="@id/title">-->
-
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:id="@+id/leftArrow"-->
-
-<!--            android:text="@string/left"-->
-<!--            android:textSize="20sp"-->
-<!--            android:padding="4dp"-->
-<!--            android:gravity="center"/>-->
-
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="48dp"-->
-<!--            android:id="@+id/week"-->
-
-<!--            android:text="@string/date_range"-->
-<!--            android:textSize="20sp"-->
-<!--            android:textStyle="bold"-->
-
-<!--            android:gravity="center"-->
-<!--            android:layout_below="@id/title"-->
-<!--            android:layout_alignStart="@id/title"-->
-<!--            android:layout_marginTop="3dp"/>-->
-
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:id="@+id/rightArrow"-->
-
-<!--            android:text="@string/right"-->
-<!--            android:textSize="20sp"-->
-<!--            android:padding="4dp"-->
-<!--            android:gravity="center"/>-->
-<!--    </LinearLayout>-->
 
 <!--    Course list-->
     <Spinner
@@ -97,11 +56,10 @@
 
         android:spinnerMode="dropdown"
 
-        android:layout_below="@id/title"
+        android:layout_below="@id/TitleMenuBar"
         android:layout_marginTop="5dp"
-        android:layout_alignEnd="@id/openTasks"
-        android:layout_alignBottom="@id/dateRange"
-        android:layout_marginEnd="10dp" />
+        android:layout_alignEnd="@id/TitleMenuBar"
+        android:layout_alignBottom="@id/dateRange" />
 
     <View
         android:layout_width="wrap_content"

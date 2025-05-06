@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Rect
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
@@ -36,13 +37,39 @@ class CourseCreation(private val context: Context, private val onCourseAdded: ()
                 }
 
                 val db = FirebaseFirestore.getInstance()
-                val courseRef = db.collection("users").document(userId).collection("courses").document(courseName)
+                val coursesRef = db.collection("users").document(userId).collection("courses")
+                val courseRef = coursesRef.document(courseName)
+                val colorPalette = CourseColorManager.colorPalette
 
-                courseRef.set(mapOf("progress" to 0f)).addOnSuccessListener {
-                    Toast.makeText(context, "Course added", Toast.LENGTH_SHORT).show()
-                    onCourseAdded()
-                }.addOnFailureListener {
-                    Toast.makeText(context, "Failed to add course", Toast.LENGTH_SHORT).show()
+                coursesRef.get().addOnSuccessListener { existingCourse ->
+                    val usedColors = existingCourse.mapNotNull { it.getString("color") }.toSet()
+                    val availableColor = colorPalette.firstOrNull { it !in usedColors }
+                        ?: colorPalette[existingCourse.size() % colorPalette.size]
+
+                    val courseData = mapOf(
+                        "progress" to 0f,
+                        "color" to availableColor  // this is a hex string
+                    )
+
+                    coursesRef.document("placeholder").get().addOnSuccessListener { placeholderDoc ->
+                        if (placeholderDoc.exists()) {
+                            coursesRef.document("placeholder").delete()
+                                .addOnSuccessListener {
+                                    Log.d("CourseCreation", "Placeholder removed")
+                                }
+                                .addOnFailureListener {
+                                    Log.e("CourseCreation", "Failed to delete placeholder", it)
+                                }
+                        }
+
+                        // Then add the real course
+                        courseRef.set(courseData).addOnSuccessListener {
+                            Toast.makeText(context, "Course added", Toast.LENGTH_SHORT).show()
+                            onCourseAdded()
+                        }.addOnFailureListener {
+                            Toast.makeText(context, "Failed to add course", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -50,7 +77,7 @@ class CourseCreation(private val context: Context, private val onCourseAdded: ()
 
         dialog.setOnShowListener {
             val root = dialog.window?.decorView?.rootView
-            root?.setOnTouchListener { v, event ->
+            root?.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     val focusedView = dialog.currentFocus
                     if (focusedView is EditText) {

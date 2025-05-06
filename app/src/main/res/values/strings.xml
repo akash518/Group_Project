@@ -17,4 +17,7 @@
     <string name="course">Course</string>
     <string name="save">Save</string>
     <string name="mark_as_complete">Mark as complete</string>
+    <string name="all_tasks">All Tasks</string>
+    <string name="menu">Menu</string>
+    <string name="logout">Logout</string>
 </resources>

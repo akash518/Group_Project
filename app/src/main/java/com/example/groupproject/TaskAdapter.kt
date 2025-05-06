@@ -10,7 +10,13 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Date
 
-data class Task(val courseId: String, val taskName: String, val isCompleted: Boolean, val dueDateFormatted: String, val dueDate: Date?)
+data class Task(
+    val courseId: String,
+    val taskName: String,
+    val isCompleted: Boolean,
+    val dueDateFormatted: String,
+    val dueDate: Date?
+)
 
 class TaskAdapter(
     private val tasks: MutableList<Task>,

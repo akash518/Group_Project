@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
+import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
+import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOverlay
@@ -17,6 +19,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -33,6 +36,7 @@ import kotlin.math.abs
 
 class HomeActivity : AppCompatActivity() {
 
+    private lateinit var menu: ImageButton
     private lateinit var progressRings: ProgressView
     private lateinit var progressText: TextView
     private lateinit var courseSpinner: Spinner
@@ -42,24 +46,24 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var rightArrow: TextView
     private lateinit var addCourse: Button
     private lateinit var createTask: Button
-    private var currentStartDate: Calendar = getStartOfWeek(Calendar.getInstance())
 
+    private var currentStartDate: Calendar = getStartOfWeek(Calendar.getInstance())
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
     private var courseProgressList = listOf<CourseProgress>()
     private val allTasks = mutableListOf<Task>()
-    private val courseColors = mutableMapOf<String, Int>()
-    private val colorPalette = listOf(
-        Color.parseColor("#E53935"), // Red
-        Color.parseColor("#FB8C00"), // Orange
-        Color.parseColor("#43A047"), // Green
-        Color.parseColor("#1E88E5"), // Blue
-        Color.parseColor("#8E24AA"), // Purple
-        Color.parseColor("#00897B"), // Teal
-        Color.parseColor("#FDD835"), // Yellow
-        Color.parseColor("#795548"),   // brown
-        Color.parseColor("#607D8B")    // gray-blue
-    )
+//    private val courseColors = mutableMapOf<String, Int>()
+//    private val colorPalette = listOf(
+//        Color.parseColor("#E53935"), // Red
+//        Color.parseColor("#FB8C00"), // Orange
+//        Color.parseColor("#43A047"), // Green
+//        Color.parseColor("#1E88E5"), // Blue
+//        Color.parseColor("#8E24AA"), // Purple
+//        Color.parseColor("#00897B"), // Teal
+//        Color.parseColor("#FDD835"), // Yellow
+//        Color.parseColor("#795548"),   // brown
+//        Color.parseColor("#607D8B")    // gray-blue
+//    )
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -67,6 +71,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.homescreen)
 
+        menu = findViewById(R.id.menu)
         dateRange = findViewById(R.id.dateRange)
 //        leftArrow = findViewById(R.id.leftArrow)
 //        rightArrow = findViewById(R.id.rightArrow)
@@ -110,15 +115,15 @@ class HomeActivity : AppCompatActivity() {
         }
 
         val gestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
-            private val swipe_threshold = 100
-            private val swipe_velocity_threshold = 100
+            private val swipeThreshold = 100
+            private val swipeVelocityThreshold = 100
 
             override fun onFling(p0: MotionEvent?, p1: MotionEvent, p2: Float, p3: Float): Boolean {
-                if (p0 == null || p1 == null) return false
+                if (p0 == null) return false
                 val diffX = p1.x - p0.x
                 val diffY = p1.y - p0.y
                 if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > swipe_threshold && abs(p2) > swipe_velocity_threshold) {
+                    if (abs(diffX) > swipeThreshold && abs(p2) > swipeVelocityThreshold) {
                         if (diffX > 0) swipeToPreviousWeek() else swipeToNextWeek()
                         return true
                     }
@@ -127,6 +132,48 @@ class HomeActivity : AppCompatActivity() {
             }
         })
 
+        val fullTaskViewGestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
+            private val swipeThreshold = 100
+            private val swipeVelocityThreshold = 100
+
+            override fun onFling(p0: MotionEvent?, p1: MotionEvent, p2: Float, p3: Float): Boolean {
+                if (p0 == null) return false
+                val diffX = p1.x - p0.x
+                val diffY = p1.y - p0.y
+                if (abs(diffX) > swipeThreshold && abs(p2) > swipeVelocityThreshold) {
+                    val intent = Intent(this@HomeActivity, FullTaskViewActivity::class.java)
+                    startActivity(intent)
+                    return true
+                }
+                return false
+            }
+        })
+
+        menu.setOnClickListener { view ->
+            val popupMenu = PopupMenu(this, view)
+            popupMenu.menuInflater.inflate(R.menu.home_menu, popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menu_full_tasks -> {
+                        startActivity(Intent(this, FullTaskViewActivity::class.java))
+                        true
+                    }
+                    R.id.menu_logout -> {
+                        FirebaseAuth.getInstance().signOut()
+
+                        val prefs = getSharedPreferences("TaskTrackerPrefs", MODE_PRIVATE)
+                        prefs.edit().clear().apply()
+
+                        startActivity(Intent(this, CreateAccount::class.java))
+                        finish()
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popupMenu.show()
+        }
+
         dateRange.setOnTouchListener { v, event ->
             gestureDetector.onTouchEvent(event)
             if (event.action == MotionEvent.ACTION_MOVE) {
@@ -134,8 +181,6 @@ class HomeActivity : AppCompatActivity() {
             }
             true
         }
-
-
 
         Log.d("PrefsCheck", "Setup complete: ${prefs.getBoolean("accountSetupComplete", false)}, " +
                 "Email: ${prefs.getString("email", null)}")
@@ -156,21 +201,6 @@ class HomeActivity : AppCompatActivity() {
         }
 
         updateDateRange()
-//        leftArrow.setOnClickListener {
-//            currentStartDate.add(Calendar.DATE, -7)
-//            updateDateRange()
-//            val selected = courseSpinner.selectedItem.toString()
-//            val selectedId = if (selected == "All Courses") null else selected
-//            updateView(selectedId)
-//        }
-//
-//        rightArrow.setOnClickListener {
-//            currentStartDate.add(Calendar.DATE, 7)
-//            updateDateRange()
-//            val selected = courseSpinner.selectedItem.toString()
-//            val selectedId = if (selected == "All Courses") null else selected
-//            updateView(selectedId)
-//        }
 
         addCourse.setOnClickListener {
             CourseCreation(this) {
@@ -195,6 +225,12 @@ class HomeActivity : AppCompatActivity() {
 //            val selectedId = if (selected == "All Courses") null else selected
 //            updateView(selectedId)
         }
+
+        val rootView = findViewById<View>(android.R.id.content)
+        rootView.setOnTouchListener { _, event ->
+            fullTaskViewGestureDetector.onTouchEvent(event)
+            true
+        }
     }
 
     private fun loadProgressFromFirebase() {
@@ -212,6 +248,7 @@ class HomeActivity : AppCompatActivity() {
 
                 courseProgressList = listOf(CourseProgress("No Courses", 0f))
                 allTasks.clear()
+                CourseColorManager.reset()
 
                 val adapter = ArrayAdapter(this, R.layout.spinner_item, listOf("All Courses"))
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -231,6 +268,9 @@ class HomeActivity : AppCompatActivity() {
             for (courseDoc in courseDocs) {
                 val courseId = courseDoc.id
                 val taskRef = courseRef.document(courseId).collection("tasks")
+                val colorHex = courseDoc.getString("color") ?: "#9E9E9E"
+                CourseColorManager.setColorForCourse(courseId, colorHex)
+
 
                 taskRef.get().addOnSuccessListener { tasks ->
                     val thisCourseTotal = tasks.size()
@@ -268,13 +308,13 @@ class HomeActivity : AppCompatActivity() {
                         Log.d("HomeActivity", "Finished loading all courses")
                         courseProgressList = progressList
 
-                        courseColors.clear()
-                        for ((index, course) in courseProgressList.withIndex()) {
-                            if (!courseColors.containsKey(course.courseId)) {
-                                val color = colorPalette[index % colorPalette.size]
-                                courseColors[course.courseId] = color
-                            }
-                        }
+//                        courseColors.clear()
+//                        for ((index, course) in courseProgressList.withIndex()) {
+//                            if (!courseColors.containsKey(course.courseId)) {
+//                                val color = colorPalette[index % colorPalette.size]
+//                                courseColors[course.courseId] = color
+//                            }
+//                        }
 
                         val spinnerItems = mutableListOf("All Courses")
                         spinnerItems.addAll(courseProgressList.map {it.courseId})
@@ -310,6 +350,15 @@ class HomeActivity : AppCompatActivity() {
 //                    task.dueDate.after(selectedStart) &&
 //                    task.dueDate.before(selectedEnd)
         }
+
+        val now = Calendar.getInstance().time
+        val sortedTasks = filteredTasks.sortedWith(compareBy<Task> {
+            when {
+                !it.isCompleted && it.dueDate != null && it.dueDate.before(now) -> 0 // Overdue
+                !it.isCompleted -> 1 // In Progress
+                else -> 2 // Completed
+            }
+        }.thenBy { it.dueDate })
 //        Log.d("DateRange", "Filtered: " + filteredTasks.toString())
 //        Log.d("DateRange", "All: " + allTasks.toString())
         Log.d("DateRange", "Courses: " + courseProgressList.toString())
@@ -338,7 +387,7 @@ class HomeActivity : AppCompatActivity() {
         }
         Log.d("DateRange", "Updated: " + updatedProgress.toString())
 
-        progressRings.setCourseColors(courseColors)
+        progressRings.setCourseColors(CourseColorManager.getAllColors())
         progressRings.updateProgress(updatedProgress)
         progressRings.setSelectedCourse(selectedCourseId)
 
@@ -363,8 +412,8 @@ class HomeActivity : AppCompatActivity() {
         )
         progressText.text = spannable
 
-        taskRecyclerView.adapter = TaskAdapter(filteredTasks.toMutableList(), { task ->
-            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@TaskAdapter
+        taskRecyclerView.adapter = TaskAdapter(sortedTasks.toMutableList(), { task ->
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@TaskAdapter
             val taskRef = FirebaseFirestore.getInstance()
                 .collection("users").document(userId)
                 .collection("courses").document(task.courseId)
@@ -378,7 +427,7 @@ class HomeActivity : AppCompatActivity() {
                 .addOnFailureListener {
                     Toast.makeText(this, "Failed to update task", Toast.LENGTH_SHORT).show()
                 }
-        }, courseColors)
+        }, CourseColorManager.getAllColors())
     }
 
     private fun getStartOfWeek(date: Calendar): Calendar {
