@@ -101,6 +101,7 @@ class CreateAccount : AppCompatActivity() {
                             .addOnSuccessListener {
                                 userRef.collection("courses").document("placeholder").set(mapOf("placeholder" to true))
                                 saveCredentials(email, password)
+                                Toast.makeText(this, "Sign up Successful", Toast.LENGTH_SHORT).show()
                                 openHome()
                             }
                             .addOnFailureListener {

@@ -17,7 +17,7 @@ class FullTaskViewActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private val allTasks = mutableListOf<Task>()
-    private val courseColors = mutableMapOf<String, Int>()
+//    private val courseColors = mutableMapOf<String, Int>()
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -33,7 +33,7 @@ class FullTaskViewActivity : AppCompatActivity() {
         }
 
         val titleTextView = TextView(this).apply {
-            text = "All Tasks"
+            text = context.getString(R.string.all_tasks)
             textSize = 24f
             gravity = Gravity.CENTER
             setPadding(0, 50, 0, 30)
@@ -85,8 +85,27 @@ class FullTaskViewActivity : AppCompatActivity() {
 
                             loadedCourses++
                             if (loadedCourses == courses.size()) {
-                                recyclerView.adapter = TaskAdapter(allTasks, { task ->
-                                    val taskRef = db.collection("users").document(userId)
+                                val now = java.util.Calendar.getInstance().time
+                                val sortedTasks = allTasks.sortedWith(compareBy<Task> {
+                                    when {
+                                        !it.isCompleted && it.dueDate != null && it.dueDate.before(now) -> 0 // Overdue
+                                        !it.isCompleted -> 1 // In Progress
+                                        else -> 2 // Completed
+                                    }
+                                }.thenBy { it.dueDate }) // Optional within-group sorting
+
+                                val distinctCourses = allTasks.map { it.courseId }.distinct()
+                                for (courseId in distinctCourses) {
+                                    db.collection("users").document(userId).collection("courses")
+                                        .document(courseId).get()
+                                        .addOnSuccessListener { doc ->
+                                            val hex = doc.getString("color") ?: "#9E9E9E"
+                                            CourseColorManager.setColorForCourse(courseId, hex)
+                                        }
+                                }
+
+                                recyclerView.adapter = TaskAdapter(sortedTasks.toMutableList(), { task ->
+                                val taskRef = db.collection("users").document(userId)
                                         .collection("courses").document(task.courseId)
                                         .collection("tasks").document(task.taskName)
 
@@ -95,7 +114,7 @@ class FullTaskViewActivity : AppCompatActivity() {
                                         allTasks.clear()
                                         loadAllTasks()
                                     }
-                                }, courseColors)
+                                }, CourseColorManager.getAllColors())
                             }
                         }
                 }
