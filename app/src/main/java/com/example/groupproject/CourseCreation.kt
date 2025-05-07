@@ -48,7 +48,7 @@ class CourseCreation(private val context: Context, private val onCourseAdded: ()
 
                     val courseData = mapOf(
                         "progress" to 0f,
-                        "color" to availableColor  // this is a hex string
+                        "color" to availableColor
                     )
 
                     coursesRef.document("placeholder").get().addOnSuccessListener { placeholderDoc ->

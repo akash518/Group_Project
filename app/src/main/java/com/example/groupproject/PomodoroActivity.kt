@@ -75,8 +75,9 @@ class PomodoroActivity : AppCompatActivity() {
             timerText.text = String.format("%02d:00", durationSelected)
         }
 
-    }
 
+
+    }
 
 //    changes duration according to status
     private fun startPomodoro(){
@@ -135,7 +136,7 @@ class PomodoroActivity : AppCompatActivity() {
         }
     }
 
-    //handels when user customizes timer
+    //handles when user customizes timer
     inner class SeekListener : SeekBar.OnSeekBarChangeListener{
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             if (progress < 1) {
@@ -150,6 +151,7 @@ class PomodoroActivity : AppCompatActivity() {
         override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 
     }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         gestureDetector.onTouchEvent(event)
         return super.onTouchEvent(event)
@@ -172,8 +174,18 @@ class PomodoroActivity : AppCompatActivity() {
                 kotlin.math.abs(diffX) > SWIPE_THRESHOLD &&
                 kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD
             ) {
-                if (diffX > 0) {
-                    finish() //ends activity when user swipes left to right
+                if (diffX < 0) {
+                    finish() //ends activity when user swipes right to left
+//                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+//                        overrideActivityTransition(
+//                            OVERRIDE_TRANSITION_CLOSE,
+//                            R.anim.slide_in_right,
+//                            R.anim.slide_out_left
+//                        )
+//                    } else {
+//                        @Suppress("DEPRECATION")
+//                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+//                    }
                 }
                 return true
             }

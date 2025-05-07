@@ -1,8 +1,15 @@
 package com.example.groupproject
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.GestureDetector
 import android.view.Gravity
+import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -12,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlin.math.abs
 
 class FullTaskViewActivity : AppCompatActivity() {
 
@@ -21,6 +29,7 @@ class FullTaskViewActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -39,6 +48,40 @@ class FullTaskViewActivity : AppCompatActivity() {
             setPadding(0, 50, 0, 30)
         }
 
+        val gestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
+            private val swipeThreshold = 100
+            private val swipeVelocityThreshold = 100
+
+            override fun onFling(p0: MotionEvent?, p1: MotionEvent, p2: Float, p3: Float): Boolean {
+                if (p0 == null) return false
+                val diffX = p1.x - p0.x
+                val diffY = p1.y - p0.y
+                if (abs(diffX) > abs(diffY)) {
+                    if (abs(diffX) > swipeThreshold && abs(p2) > swipeVelocityThreshold) {
+                        finish()
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+//                            overrideActivityTransition(
+//                                Activity.OVERRIDE_TRANSITION_CLOSE,
+//                                R.anim.slide_in_left,
+//                                R.anim.slide_out_right
+//                            )
+//                        } else {
+//                            @Suppress("DEPRECATION")
+//                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+//                        }
+                        return true
+                    }
+                }
+                return false
+            }
+        })
+
+        val rootView = findViewById<View>(android.R.id.content)
+        rootView.setOnTouchListener {_, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+
         recyclerView = RecyclerView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -46,6 +89,11 @@ class FullTaskViewActivity : AppCompatActivity() {
                 1f
             )
             layoutManager = LinearLayoutManager(this@FullTaskViewActivity)
+        }
+
+        recyclerView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            false
         }
 
         rootLayout.addView(titleTextView)

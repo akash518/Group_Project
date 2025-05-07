@@ -2,8 +2,6 @@ package com.example.groupproject
 
 import android.graphics.Color
 
-//TODO: Fix color manager to save course colors
-
 object CourseColorManager {
     val colorPalette = listOf(
         "#E53935", // Red
