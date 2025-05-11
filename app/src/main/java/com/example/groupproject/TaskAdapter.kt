@@ -21,7 +21,9 @@ data class Task(
 class TaskAdapter(
     private val tasks: MutableList<Task>,
     private val onTaskCompleted: (Task) -> Unit,
-    private val courseColors: Map<String, Int>
+    private val courseColors: Map<String, Int>,
+    private val onTaskLongPressed: (Task) -> Unit
+
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
     class TaskViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val courseName: TextView = view.findViewById(R.id.courseName)
@@ -45,6 +47,11 @@ class TaskAdapter(
         holder.itemView.findViewById<View>(R.id.colorBlock).setBackgroundColor(color)
         holder.complete.setOnClickListener {
             onTaskCompleted(task)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onTaskLongPressed(task)
+            true
         }
 
     }
