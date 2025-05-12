@@ -34,6 +34,8 @@ class HomeView : AppCompatActivity() {
     private lateinit var dateRangeGestureDetector: GestureDetector
     private lateinit var viewGestureDetector: GestureDetector
 
+    private var firstResume = true
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -291,6 +293,10 @@ class HomeView : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (firstResume) {
+            firstResume = false
+            return
+        }
         controller.refresh()
     }
 }

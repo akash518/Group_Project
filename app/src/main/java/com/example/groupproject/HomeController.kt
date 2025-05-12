@@ -116,17 +116,15 @@ class HomeController(private val context: Context, private val model: HomeModel,
 
     private fun updateView() {
         view.updateDateRange(model.getDateRange())
-
         val filteredData = model.getFilteredTasks(selectedCourseId)
-
         view.updateProgress(
             progress = filteredData.weeklyProgress,
             selectedCourseId = selectedCourseId,
             completedCount = filteredData.completed,
             totalCount = filteredData.total
         )
-
         view.updateTaskList(filteredData.tasks)
+        model.checkAndSendReminders()
     }
 
     private fun onAuthSuccess() {
@@ -203,5 +201,6 @@ class HomeController(private val context: Context, private val model: HomeModel,
 
     fun refresh() {
         model.loadProgress()
+        model.checkAndSendReminders()
     }
 }

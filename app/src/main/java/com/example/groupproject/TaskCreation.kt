@@ -114,7 +114,8 @@ class TaskCreation(private val context: Context, private val courseList: List<St
             val userId = auth.currentUser?.uid ?: return@setOnClickListener
             val taskMap = mapOf(
                 "completed" to false,
-                "dueDate" to Timestamp(selectedDate.time)
+                "dueDate" to Timestamp(selectedDate.time),
+                "reminderSent" to false //added this for managing emails
             )
 
             db.collection("users").document(userId)
