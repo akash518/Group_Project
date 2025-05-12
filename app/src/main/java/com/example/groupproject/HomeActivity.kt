@@ -1,24 +1,21 @@
 package com.example.groupproject
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Rect
-import android.media.Image
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
-import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewOverlay
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.TextView
@@ -26,7 +23,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -35,15 +31,13 @@ import java.util.Locale
 import kotlin.math.abs
 
 class HomeActivity : AppCompatActivity() {
-
+    private lateinit var controller: HomeController
     private lateinit var menu: ImageButton
     private lateinit var progressRings: ProgressView
     private lateinit var progressText: TextView
     private lateinit var courseSpinner: Spinner
     private lateinit var taskRecyclerView: RecyclerView
     private lateinit var dateRange: TextView
-    private lateinit var leftArrow: TextView
-    private lateinit var rightArrow: TextView
     private lateinit var addCourse: Button
     private lateinit var createTask: Button
     private var userId: String? = null
@@ -67,7 +61,6 @@ class HomeActivity : AppCompatActivity() {
 //        Color.parseColor("#607D8B")    // gray-blue
 //    )
 
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,48 +68,58 @@ class HomeActivity : AppCompatActivity() {
 
         menu = findViewById(R.id.menu)
         dateRange = findViewById(R.id.dateRange)
-//        leftArrow = findViewById(R.id.leftArrow)
-//        rightArrow = findViewById(R.id.rightArrow)
         courseSpinner = findViewById(R.id.courses)
         progressRings = findViewById(R.id.progressRings)
         progressText = findViewById(R.id.progressText)
         taskRecyclerView = findViewById(R.id.taskView)
         taskRecyclerView.layoutManager = LinearLayoutManager(this)
-        addCourse = findViewById<Button>(R.id.addCourse)
-        createTask = findViewById<Button>(R.id.createTask)
+        addCourse = findViewById(R.id.addCourse)
+        createTask = findViewById(R.id.createTask)
 
-        val userId = auth.currentUser?.uid
+        val user = auth.currentUser
         val prefs = getSharedPreferences("TaskTrackerPrefs", MODE_PRIVATE)
-        if (userId != null) {
-            val setupComplete = prefs.getBoolean("accountSetupComplete", false)
-            Log.d("Account", userId)
-            Log.d("Account", setupComplete.toString())
-            if (!setupComplete) {
-                Log.d("Account", userId)
-                db.collection("users").document(userId).get()
-                    .addOnSuccessListener { doc ->
-                        val isValid = doc.exists() && doc.getString("email") != null
+        if (user != null) {
+            user.getIdToken(true).addOnCompleteListener { token ->
+                if (token.isSuccessful) {
+                    val setupComplete = prefs.getBoolean("accountSetupComplete", false)
+                    val userId = user.uid
 
-                        if (!isValid) {
-                            startActivity(Intent(this, CreateAccount::class.java))
-                            finish()
-                        } else {
-                            prefs.edit().putBoolean("accountSetupComplete", true).apply()
-                        }
+                    Log.d("Account", userId)
+                    Log.d("Account", setupComplete.toString())
+
+                    if (!setupComplete) {
+                        Log.d("Account", userId)
+                        db.collection("users").document(userId).get()
+                            .addOnSuccessListener { doc ->
+                                val isValid = doc.exists() && doc.getString("email") != null
+
+                                if (!isValid) {
+                                    FirebaseAuth.getInstance().signOut()
+                                    prefs.edit().clear().apply()
+                                    showLoginDialog()
+
+                                } else {
+                                    prefs.edit().putBoolean("accountSetupComplete", true).apply()
+                                    loadProgressFromFirebase()
+                                }
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "Failed to check user info", Toast.LENGTH_SHORT).show()
+                            }
+                    } else {
                         loadProgressFromFirebase()
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Failed to check user info", Toast.LENGTH_SHORT).show()
-                    }
+                } else {
+                    FirebaseAuth.getInstance().signOut()
+                    prefs.edit().clear().apply()
+                    showLoginDialog()
+                }
             }
-            loadProgressFromFirebase()
         } else {
-            startActivity(Intent(this, CreateAccount::class.java))
-            finish()
-            loadProgressFromFirebase()
+            showLoginDialog()
         }
 
-        val gestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
+        val dateRangeGestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
             private val swipeThreshold = 100
             private val swipeVelocityThreshold = 100
 
@@ -134,7 +137,7 @@ class HomeActivity : AppCompatActivity() {
             }
         })
 
-        val fullTaskViewGestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
+        val viewGestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
             private val swipeThreshold = 100
             private val swipeVelocityThreshold = 100
 
@@ -142,9 +145,35 @@ class HomeActivity : AppCompatActivity() {
                 if (p0 == null) return false
                 val diffX = p1.x - p0.x
                 val diffY = p1.y - p0.y
-                if (abs(diffX) > swipeThreshold && abs(p2) > swipeVelocityThreshold) {
-                    val intent = Intent(this@HomeActivity, FullTaskViewActivity::class.java)
-                    startActivity(intent)
+
+                if (abs(diffX) > abs(diffY)) {
+                    if (diffX > 0 && abs(p2) > swipeVelocityThreshold) {
+                        val intent = Intent(this@HomeActivity, PomodoroActivity::class.java)
+                        startActivity(intent)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            overrideActivityTransition(
+                                Activity.OVERRIDE_TRANSITION_OPEN,
+                                R.anim.slide_in_right,
+                                R.anim.slide_out_left
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        }
+                    } else {
+                        val intent = Intent(this@HomeActivity, FullTaskViewActivity::class.java)
+                        startActivity(intent)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            overrideActivityTransition(
+                                Activity.OVERRIDE_TRANSITION_OPEN,
+                                R.anim.slide_in_left,
+                                R.anim.slide_out_right
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                        }
+                    }
                     return true
                 }
                 return false
@@ -156,6 +185,10 @@ class HomeActivity : AppCompatActivity() {
             popupMenu.menuInflater.inflate(R.menu.home_menu, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
+                    R.id.menu_pomodoro -> {
+                        startActivity(Intent(this, PomodoroActivity::class.java))
+                        true
+                    }
                     R.id.menu_full_tasks -> {
                         startActivity(Intent(this, FullTaskViewActivity::class.java))
                         true
@@ -166,8 +199,9 @@ class HomeActivity : AppCompatActivity() {
                         val prefs = getSharedPreferences("TaskTrackerPrefs", MODE_PRIVATE)
                         prefs.edit().clear().apply()
 
-                        startActivity(Intent(this, CreateAccount::class.java))
-                        finish()
+                        CreateAccount {
+                            recreate() // Or loadProgressFromFirebase() if you just want to refresh
+                        }.show(supportFragmentManager, "CreateAccountDialog")
                         true
                     }
                     else -> false
@@ -177,7 +211,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         dateRange.setOnTouchListener { v, event ->
-            gestureDetector.onTouchEvent(event)
+            dateRangeGestureDetector.onTouchEvent(event)
             if (event.action == MotionEvent.ACTION_MOVE) {
                 v.performClick()
             }
@@ -230,8 +264,13 @@ class HomeActivity : AppCompatActivity() {
 
         val rootView = findViewById<View>(android.R.id.content)
         rootView.setOnTouchListener { _, event ->
-            fullTaskViewGestureDetector.onTouchEvent(event)
+            viewGestureDetector.onTouchEvent(event)
             true
+        }
+
+        taskRecyclerView.setOnTouchListener { _, event ->
+            viewGestureDetector.onTouchEvent(event)
+            false
         }
     }
 
@@ -319,7 +358,7 @@ class HomeActivity : AppCompatActivity() {
 //                        }
 
                         val spinnerItems = mutableListOf("All Courses")
-                        spinnerItems.addAll(courseProgressList.map {it.courseId})
+                        spinnerItems.addAll(courseProgressList.map { it.courseId }.filter { it != "placeholder" })
                         val adapter = ArrayAdapter(this, R.layout.spinner_item, spinnerItems)
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         courseSpinner.adapter = adapter
@@ -363,8 +402,8 @@ class HomeActivity : AppCompatActivity() {
         }.thenBy { it.dueDate })
 //        Log.d("DateRange", "Filtered: " + filteredTasks.toString())
 //        Log.d("DateRange", "All: " + allTasks.toString())
-        Log.d("DateRange", "Courses: " + courseProgressList.toString())
-        Log.d("DateRange", "Weekly: " + weeklyTasks.toString())
+        Log.d("DateRange", "Courses: $courseProgressList")
+        Log.d("DateRange", "Weekly: $weeklyTasks")
 //        if (filteredTasks.size > 0) {
 //            Log.d("DateRange", filteredTasks[0].dueDate?.after(selectedStart).toString())
 //            Log.d("DateRange", filteredTasks[0].dueDate?.before(selectedEnd).toString())
@@ -380,14 +419,14 @@ class HomeActivity : AppCompatActivity() {
             }
             courseData[task.courseId] = updated
         }
-        Log.d("DateRange", "Data: " + courseData.toString())
+        Log.d("DateRange", "Data: $courseData")
 
         val updatedProgress = courseProgressList.map {course ->
             val (completed, total) = courseData[course.courseId]?: (0 to 0)
             val progress = if (total > 0) completed.toFloat() / total else 0f
             CourseProgress(course.courseId, progress)
         }
-        Log.d("DateRange", "Updated: " + updatedProgress.toString())
+        Log.d("DateRange", "Updated: $updatedProgress")
 
         progressRings.setCourseColors(CourseColorManager.getAllColors())
         progressRings.updateProgress(updatedProgress)
@@ -482,6 +521,12 @@ class HomeActivity : AppCompatActivity() {
         updateView(selectedId)
     }
 
+    private fun showLoginDialog() {
+        CreateAccount {
+            recreate()
+        }.show(supportFragmentManager, "CreateAccountDialog")
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {
             val v = currentFocus
@@ -497,5 +542,4 @@ class HomeActivity : AppCompatActivity() {
         }
         return super.dispatchTouchEvent(ev)
     }
-
 }

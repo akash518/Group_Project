@@ -20,4 +20,9 @@
     <string name="all_tasks">All Tasks</string>
     <string name="menu">Menu</string>
     <string name="logout">Logout</string>
+    <string name="pomodoro_timer">Pomodoro Timer</string>
+    <string name="course_title">Course Title</string>
+    <string name="delete">Delete</string>
+    <string name="all_courses">All Courses</string>
+    <string name="manage_courses">Manage Courses</string>
 </resources>

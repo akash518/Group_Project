@@ -1,6 +1,7 @@
 package com.example.groupproject
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -63,6 +64,7 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         invalidate()
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
 //        Log.w("HomeActivity", "onDraw")
 //        Log.d("HomeActivity", "Courses: $courses")
@@ -70,9 +72,9 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         super.onDraw(canvas)
         val centerX = width / 2f
         val centerY = height / 2f
-//        var radius = (min(width, height) / 4f) - ringWidth
-        val availableRadius = (min(width, height) / 3f) - 60
         val numberOfCourses = courses.size
+        val denominator = 4f
+        val availableRadius = (min(width, height) / denominator)
         val totalSpacing = (numberOfCourses - 1) * spacing
         val maxWidth = availableRadius - totalSpacing
 
@@ -80,8 +82,8 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         var radius = if (numberOfCourses == 1) (availableRadius) else ringWidth * numberOfCourses + spacing * (numberOfCourses - 1)
         val isAllCourses = selectedCourseId == null
 //        Log.d("ProgressView", "Radius: $radius")
-//        Log.d("ProgressView", "Available Radius: $availableRadius")
-//        Log.d("ProgressView", "Total Courses: $numberOfCourses")
+        Log.d("ProgressView", "Available Radius: $availableRadius")
+        Log.d("ProgressView", "Total Courses: $numberOfCourses")
 //        Log.d("ProgressView", "Total Spacing: $totalSpacing")
 //        Log.d("ProgressView", "Max Width: $maxWidth")
 //        Log.d("ProgressView", "Ring Width: $ringWidth")
