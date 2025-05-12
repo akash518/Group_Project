@@ -180,6 +180,11 @@ class HomeController(private val context: Context, private val model: HomeModel,
         view.navigateToActivity(intent, R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
+    fun onManageCoursesNavigation() {
+        val intent = Intent(context, ManageCourses::class.java)
+        view.navigateToActivity(intent, R.anim.slide_in_left, R.anim.slide_out_right)
+    }
+
     private fun getCourseList(): List<String> {
         return model.getCourseProgressList().map { it.courseId }.filter {
             it != "No Courses" && it != "placeholder" && it.isNotBlank()

@@ -9,6 +9,10 @@
         android:title="@string/all_tasks" />
 
     <item
+        android:id="@+id/menu_manage_courses"
+        android:title="@string/manage_courses" />
+
+    <item
         android:id="@+id/menu_logout"
         android:title="@string/logout" />
 </menu>

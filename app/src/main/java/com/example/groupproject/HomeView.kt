@@ -109,7 +109,6 @@ class HomeView : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupEventListeners() {
-        // Menu click
         menu.setOnClickListener { view ->
             val popupMenu = PopupMenu(this, view)
             popupMenu.menuInflater.inflate(R.menu.home_menu, popupMenu.menu)
@@ -121,6 +120,10 @@ class HomeView : AppCompatActivity() {
                     }
                     R.id.menu_full_tasks -> {
                         controller.onFullTasksNavigation()
+                        true
+                    }
+                    R.id.menu_manage_courses -> {
+                        controller.onManageCoursesNavigation()
                         true
                     }
                     R.id.menu_logout -> {
@@ -245,7 +248,6 @@ class HomeView : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    // Navigation method
     fun navigateToActivity(intent: Intent, enterAnim: Int, exitAnim: Int) {
         startActivity(intent)
 

@@ -25,7 +25,6 @@ class FullTaskViewActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private val allTasks = mutableListOf<Task>()
-//    private val courseColors = mutableMapOf<String, Int>()
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -57,18 +56,20 @@ class FullTaskViewActivity : AppCompatActivity() {
                 val diffX = p1.x - p0.x
                 val diffY = p1.y - p0.y
                 if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > swipeThreshold && abs(p2) > swipeVelocityThreshold) {
+                    if (diffX > 0 && abs(p2) > swipeVelocityThreshold) {
                         finish()
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-//                            overrideActivityTransition(
-//                                Activity.OVERRIDE_TRANSITION_CLOSE,
-//                                R.anim.slide_in_left,
-//                                R.anim.slide_out_right
-//                            )
-//                        } else {
-//                            @Suppress("DEPRECATION")
-//                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-//                        }
+                    } else {
+                        startActivity(Intent(this@FullTaskViewActivity, ManageCourses::class.java))
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            overrideActivityTransition(
+                                Activity.OVERRIDE_TRANSITION_OPEN,
+                                R.anim.slide_in_left,
+                                R.anim.slide_out_right
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                        }
                         return true
                     }
                 }
@@ -98,7 +99,6 @@ class FullTaskViewActivity : AppCompatActivity() {
 
         rootLayout.addView(titleTextView)
         rootLayout.addView(recyclerView)
-
         setContentView(rootLayout)
 
         loadAllTasks()

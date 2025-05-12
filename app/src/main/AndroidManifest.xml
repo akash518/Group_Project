@@ -32,6 +32,7 @@
         <activity android:name=".HomeView" />
         <activity android:name=".PomodoroActivity" />
         <activity android:name=".FullTaskViewActivity" />
+        <activity android:name=".ManageCourses" />
     </application>
 
 </manifest>
