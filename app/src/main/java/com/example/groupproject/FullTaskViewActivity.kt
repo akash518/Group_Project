@@ -114,6 +114,7 @@ class FullTaskViewActivity : AppCompatActivity() {
 
     private fun loadAllTasks() {
         val userId = auth.currentUser?.uid ?: return
+        allTasks.clear()
 
         db.collection("users").document(userId).collection("courses")
             .get().addOnSuccessListener { courses ->

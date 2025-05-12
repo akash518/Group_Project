@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Group Project</string>
     <string name="tasks">Tasks</string>
+    <string name="task_tracker">Task Tracker</string>
     <string name="date_range">Date Range</string>
     <string name="add_course">Add Course</string>
     <string name="email">Email</string>

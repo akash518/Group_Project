@@ -125,7 +125,7 @@ class HomeModel(private val context: Context) {
     fun getAllTasks(): List<Task> = allTasks
     fun getCourseProgressList(): List<CourseProgress> = courseProgressList
 
-    fun getCurrentStartDate(): Calendar = currentStartDate
+    private fun getCurrentStartDate(): Calendar = currentStartDate
     fun goToPreviousWeek() { currentStartDate.add(Calendar.DATE, -7)}
     fun goToNextWeek() { currentStartDate.add(Calendar.DATE, 7)}
 
@@ -204,6 +204,51 @@ class HomeModel(private val context: Context) {
             completed = completed,
             total = total
         )
+    }
+
+    fun checkAndSendReminders() {
+        val now = currentStartDate.time
+        val nextDay = (currentStartDate.clone() as Calendar).apply { add(Calendar.HOUR_OF_DAY, 24) }.time
+        val userEmail = auth.currentUser?.email?: return
+        val tasks = getFilteredTasks(null).tasks
+
+        for (task in tasks) {
+            if (!task.isCompleted && task.dueDate != null && task.dueDate.after(now) && task.dueDate.before(nextDay)) {
+                val taskRef = db.collection("users")
+                    .document("courses")
+                    .collection("courses")
+                    .document(task.courseId)
+                    .collection("tasks")
+                    .document(task.taskName)
+
+                taskRef.get().addOnSuccessListener { doc ->
+                    val reminderSent = doc.getBoolean("reminderSent") ?: false
+
+                    if (!reminderSent) {
+                        EmailUtils().sendEmailReminder(
+                            email = userEmail,
+                            subject = "Reminder: \"${task.taskName}\" is due soon for ${task.courseId}",
+                            text = """
+                        Hi,
+
+                        Just a quick reminder that your assignment:
+
+                        📚 Course: ${task.courseId}
+                        📌 Task: ${task.taskName}
+                        📅 Due: ${task.dueDateFormatted}
+
+                        is coming up soon. Make sure to stay on track and submit it on time!
+
+                        Good luck and keep up the great work.
+
+                        — Task Tracker App
+                    """.trimIndent()
+                        )
+                        taskRef.update("reminderSent", true)
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/title"
 
-            android:text="@string/tasks"
+            android:text="@string/task_tracker"
             android:textSize="36sp"
             android:textStyle="bold"
 
@@ -109,6 +109,7 @@
         android:text="@string/add_course"
         android:textSize="18sp"
         android:background="@drawable/square_button"
+        android:backgroundTint="#2196F3"
 
         android:layout_below="@id/taskView"
         android:layout_marginStart="20dp"
