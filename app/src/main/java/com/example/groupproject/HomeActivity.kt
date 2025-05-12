@@ -40,6 +40,8 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var dateRange: TextView
     private lateinit var addCourse: Button
     private lateinit var createTask: Button
+    private var userId: String? = null
+
 
     private var currentStartDate: Calendar = getStartOfWeek(Calendar.getInstance())
     private val auth = FirebaseAuth.getInstance()
@@ -466,7 +468,21 @@ class HomeActivity : AppCompatActivity() {
                 .addOnFailureListener {
                     Toast.makeText(this, "Failed to update task", Toast.LENGTH_SHORT).show()
                 }
-        }, CourseColorManager.getAllColors())
+        }, CourseColorManager.getAllColors(), { task ->
+            userId?.let { uid ->
+                val taskRef = db.collection("users").document(uid)
+                    .collection("courses").document(task.courseId)
+                    .collection("tasks").document(task.taskName)
+
+                taskRef.delete().addOnSuccessListener {
+                    Toast.makeText(this, "Deleted ${task.taskName}", Toast.LENGTH_SHORT).show()
+                    allTasks.remove(task)
+                    taskRecyclerView.adapter?.notifyDataSetChanged()
+                }.addOnFailureListener {
+                    Toast.makeText(this, "Failed to delete ${task.taskName}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
     }
 
     private fun getStartOfWeek(date: Calendar): Calendar {
