@@ -73,7 +73,8 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         val centerX = width / 2f
         val centerY = height / 2f
         val numberOfCourses = courses.size
-        val availableRadius = (min(width, height) / (numberOfCourses).toFloat())
+        val denominator = 4f
+        val availableRadius = (min(width, height) / denominator)
         val totalSpacing = (numberOfCourses - 1) * spacing
         val maxWidth = availableRadius - totalSpacing
 
@@ -81,8 +82,8 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         var radius = if (numberOfCourses == 1) (availableRadius) else ringWidth * numberOfCourses + spacing * (numberOfCourses - 1)
         val isAllCourses = selectedCourseId == null
 //        Log.d("ProgressView", "Radius: $radius")
-//        Log.d("ProgressView", "Available Radius: $availableRadius")
-//        Log.d("ProgressView", "Total Courses: $numberOfCourses")
+        Log.d("ProgressView", "Available Radius: $availableRadius")
+        Log.d("ProgressView", "Total Courses: $numberOfCourses")
 //        Log.d("ProgressView", "Total Spacing: $totalSpacing")
 //        Log.d("ProgressView", "Max Width: $maxWidth")
 //        Log.d("ProgressView", "Ring Width: $ringWidth")

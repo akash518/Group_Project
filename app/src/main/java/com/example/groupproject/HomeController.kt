@@ -102,9 +102,10 @@ class HomeController(private val context: Context, private val model: HomeModel,
 
     private fun updateSpinner(courses: List<CourseProgress>) {
         val spinnerItems = mutableListOf("All Courses")
-        spinnerItems.addAll(courses.map { it.courseId }.filter {
-            it != "placeholder" && it != "No Courses"
-        })
+        val sortedCourseIds = courses.map { it.courseId }
+            .filter { it != "placeholder" && it != "No Courses" }
+            .sorted()
+        spinnerItems.addAll(sortedCourseIds)
         view.updateCourseSpinner(spinnerItems)
     }
 
@@ -189,5 +190,9 @@ class HomeController(private val context: Context, private val model: HomeModel,
         return model.getCourseProgressList().map { it.courseId }.filter {
             it != "No Courses" && it != "placeholder" && it.isNotBlank()
         }
+    }
+
+    fun refresh() {
+        model.loadProgress()
     }
 }

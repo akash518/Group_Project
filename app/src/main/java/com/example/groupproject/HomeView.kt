@@ -194,12 +194,7 @@ class HomeView : AppCompatActivity() {
         this.dateRange.text = dateRange
     }
 
-    fun updateProgress(
-        progress: List<CourseProgress>,
-        selectedCourseId: String?,
-        completedCount: Int,
-        totalCount: Int
-    ) {
+    fun updateProgress(progress: List<CourseProgress>, selectedCourseId: String?, completedCount: Int, totalCount: Int) {
         progressRings.setCourseColors(CourseColorManager.getAllColors())
         progressRings.updateProgress(progress)
         progressRings.setSelectedCourse(selectedCourseId)
@@ -280,5 +275,10 @@ class HomeView : AppCompatActivity() {
             }
         }
         return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        controller.refresh()
     }
 }
