@@ -66,6 +66,8 @@ class CourseCreation(private val context: Context, private val onCourseAdded: ()
                         courseRef.set(courseData).addOnSuccessListener {
                             Toast.makeText(context, "Course added", Toast.LENGTH_SHORT).show()
                             onCourseAdded()
+                            val prefs = context.getSharedPreferences("AdPrefs", Context.MODE_PRIVATE)
+                            prefs.edit().putInt("numberOfCourses", 0).apply()
                         }.addOnFailureListener {
                             Toast.makeText(context, "Failed to add course", Toast.LENGTH_SHORT).show()
                         }

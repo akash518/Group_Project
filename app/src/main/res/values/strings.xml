@@ -20,4 +20,5 @@
     <string name="all_tasks">All Tasks</string>
     <string name="menu">Menu</string>
     <string name="logout">Logout</string>
+    <string name="pomodoro_timer">Pomodoro Timer</string>
 </resources>

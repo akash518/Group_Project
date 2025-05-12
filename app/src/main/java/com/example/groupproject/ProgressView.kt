@@ -1,6 +1,7 @@
 package com.example.groupproject
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -63,6 +64,7 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         invalidate()
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
 //        Log.w("HomeActivity", "onDraw")
 //        Log.d("HomeActivity", "Courses: $courses")
@@ -70,9 +72,8 @@ class ProgressView(context: Context, attrs: AttributeSet? = null): View(context,
         super.onDraw(canvas)
         val centerX = width / 2f
         val centerY = height / 2f
-//        var radius = (min(width, height) / 4f) - ringWidth
-        val availableRadius = (min(width, height) / 3f) - 60
         val numberOfCourses = courses.size
+        val availableRadius = (min(width, height) / (numberOfCourses).toFloat())
         val totalSpacing = (numberOfCourses - 1) * spacing
         val maxWidth = availableRadius - totalSpacing
 

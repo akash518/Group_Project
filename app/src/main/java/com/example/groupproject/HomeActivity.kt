@@ -3,24 +3,19 @@ package com.example.groupproject
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Rect
-import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
-import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewOverlay
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.TextView
@@ -28,7 +23,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -37,15 +31,13 @@ import java.util.Locale
 import kotlin.math.abs
 
 class HomeActivity : AppCompatActivity() {
-
+    private lateinit var controller: HomeController
     private lateinit var menu: ImageButton
     private lateinit var progressRings: ProgressView
     private lateinit var progressText: TextView
     private lateinit var courseSpinner: Spinner
     private lateinit var taskRecyclerView: RecyclerView
     private lateinit var dateRange: TextView
-    private lateinit var leftArrow: TextView
-    private lateinit var rightArrow: TextView
     private lateinit var addCourse: Button
     private lateinit var createTask: Button
 
@@ -74,15 +66,13 @@ class HomeActivity : AppCompatActivity() {
 
         menu = findViewById(R.id.menu)
         dateRange = findViewById(R.id.dateRange)
-//        leftArrow = findViewById(R.id.leftArrow)
-//        rightArrow = findViewById(R.id.rightArrow)
         courseSpinner = findViewById(R.id.courses)
         progressRings = findViewById(R.id.progressRings)
         progressText = findViewById(R.id.progressText)
         taskRecyclerView = findViewById(R.id.taskView)
         taskRecyclerView.layoutManager = LinearLayoutManager(this)
-        addCourse = findViewById<Button>(R.id.addCourse)
-        createTask = findViewById<Button>(R.id.createTask)
+        addCourse = findViewById(R.id.addCourse)
+        createTask = findViewById(R.id.createTask)
 
         val user = auth.currentUser
         val prefs = getSharedPreferences("TaskTrackerPrefs", MODE_PRIVATE)
@@ -193,6 +183,10 @@ class HomeActivity : AppCompatActivity() {
             popupMenu.menuInflater.inflate(R.menu.home_menu, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
+                    R.id.menu_pomodoro -> {
+                        startActivity(Intent(this, PomodoroActivity::class.java))
+                        true
+                    }
                     R.id.menu_full_tasks -> {
                         startActivity(Intent(this, FullTaskViewActivity::class.java))
                         true
@@ -406,8 +400,8 @@ class HomeActivity : AppCompatActivity() {
         }.thenBy { it.dueDate })
 //        Log.d("DateRange", "Filtered: " + filteredTasks.toString())
 //        Log.d("DateRange", "All: " + allTasks.toString())
-        Log.d("DateRange", "Courses: " + courseProgressList.toString())
-        Log.d("DateRange", "Weekly: " + weeklyTasks.toString())
+        Log.d("DateRange", "Courses: $courseProgressList")
+        Log.d("DateRange", "Weekly: $weeklyTasks")
 //        if (filteredTasks.size > 0) {
 //            Log.d("DateRange", filteredTasks[0].dueDate?.after(selectedStart).toString())
 //            Log.d("DateRange", filteredTasks[0].dueDate?.before(selectedEnd).toString())
@@ -423,14 +417,14 @@ class HomeActivity : AppCompatActivity() {
             }
             courseData[task.courseId] = updated
         }
-        Log.d("DateRange", "Data: " + courseData.toString())
+        Log.d("DateRange", "Data: $courseData")
 
         val updatedProgress = courseProgressList.map {course ->
             val (completed, total) = courseData[course.courseId]?: (0 to 0)
             val progress = if (total > 0) completed.toFloat() / total else 0f
             CourseProgress(course.courseId, progress)
         }
-        Log.d("DateRange", "Updated: " + updatedProgress.toString())
+        Log.d("DateRange", "Updated: $updatedProgress")
 
         progressRings.setCourseColors(CourseColorManager.getAllColors())
         progressRings.updateProgress(updatedProgress)
@@ -532,5 +526,4 @@ class HomeActivity : AppCompatActivity() {
         }
         return super.dispatchTouchEvent(ev)
     }
-
 }

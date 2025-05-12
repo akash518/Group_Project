@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/menu_pomodoro"
+        android:title="@string/pomodoro_timer" />
+
+    <item
         android:id="@+id/menu_full_tasks"
         android:title="@string/all_tasks" />
 

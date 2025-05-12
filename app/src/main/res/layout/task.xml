@@ -69,8 +69,8 @@
             android:id="@+id/complete"
             android:background="@null"
             android:src="@drawable/ic_check"
-            android:contentDescription="@string/mark_as_complete"
 
+            android:contentDescription="@string/mark_as_complete"
             android:paddingHorizontal="2dp"
             android:layout_gravity="top"
             />
