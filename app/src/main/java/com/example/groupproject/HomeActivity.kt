@@ -31,7 +31,6 @@ import java.util.Locale
 import kotlin.math.abs
 
 class HomeActivity : AppCompatActivity() {
-    private lateinit var controller: HomeController
     private lateinit var menu: ImageButton
     private lateinit var progressRings: ProgressView
     private lateinit var progressText: TextView
@@ -58,6 +57,7 @@ class HomeActivity : AppCompatActivity() {
 //        Color.parseColor("#795548"),   // brown
 //        Color.parseColor("#607D8B")    // gray-blue
 //    )
+//
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -136,7 +136,6 @@ class HomeActivity : AppCompatActivity() {
         })
 
         val viewGestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
-            private val swipeThreshold = 100
             private val swipeVelocityThreshold = 100
 
             override fun onFling(p0: MotionEvent?, p1: MotionEvent, p2: Float, p3: Float): Boolean {
