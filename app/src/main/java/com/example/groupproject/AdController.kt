@@ -8,6 +8,7 @@ import java.util.*
 
 class AdController(private val context: Context) {
     private val prefs = context.getSharedPreferences("AdPrefs", Context.MODE_PRIVATE)
+    private lateinit var homeController: HomeController
 
     fun handleAppLaunch(activity: Activity) {
         val today = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
@@ -28,6 +29,7 @@ class AdController(private val context: Context) {
 
     fun showAdBeforeAddingCourse(activity: Activity, onContinue: () -> Unit) {
         val courseAdCount = prefs.getInt("coursesAdded", 0)
+        Log.d("AdController", "Courses: $courseAdCount")
         if (courseAdCount == 2) {
             prefs.edit().putInt("coursesAdded", 0).apply()
             if (AdManager.isAdReady()) {
@@ -38,15 +40,16 @@ class AdController(private val context: Context) {
                 }
             }
         } else {
-            prefs.edit().putInt("coursesAdded", (courseAdCount+1)).apply()
+//            prefs.edit().putInt("coursesAdded", (courseAdCount+1)).apply()
             onContinue()
         }
     }
 
     fun showAdBeforeAddingTask(activity: Activity, onContinue: () -> Unit) {
         val taskAdCount = prefs.getInt("tasksAdded", 0)
+        Log.d("AdController", "Tasks: $taskAdCount")
         if (taskAdCount == 2) {
-            prefs.edit().putInt("tasks", 0).apply()
+            prefs.edit().putInt("tasksAdded", 0).apply()
             if (AdManager.isAdReady()) {
                 AdManager.showAd(activity, onContinue)
             } else {
@@ -55,7 +58,7 @@ class AdController(private val context: Context) {
                 }
             }
         } else {
-            prefs.edit().putInt("tasksAdded", (taskAdCount+1)).apply()
+//            prefs.edit().putInt("tasksAdded", (taskAdCount+1)).apply()
             onContinue()
         }
     }

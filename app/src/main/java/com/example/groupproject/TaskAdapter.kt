@@ -19,15 +19,17 @@ data class Task(
 )
 
 class TaskAdapter(
-    private val tasks: MutableList<Task>,
+    val tasks: MutableList<Task>,
     private val onTaskCompleted: (Task) -> Unit,
-    private val courseColors: Map<String, Int>
+    private val courseColors: Map<String, Int>,
+    private val onTaskLongPressed: (Task) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
     class TaskViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val courseName: TextView = view.findViewById(R.id.courseName)
         val taskName: TextView = view.findViewById(R.id.taskName)
         val dueDate: TextView = view.findViewById(R.id.dueDate)
         val complete: ImageButton = view.findViewById(R.id.complete)
+        val card: CardView = view as CardView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -56,6 +58,11 @@ class TaskAdapter(
             holder.complete.setOnClickListener {
                 onTaskCompleted(task)
             }
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onTaskLongPressed(task)
+            true
         }
     }
 

@@ -32,6 +32,9 @@ class FullTaskViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "All Tasks"
+
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -104,6 +107,11 @@ class FullTaskViewActivity : AppCompatActivity() {
         loadAllTasks()
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
+
     private fun loadAllTasks() {
         val userId = auth.currentUser?.uid ?: return
 
@@ -162,7 +170,28 @@ class FullTaskViewActivity : AppCompatActivity() {
                                         allTasks.clear()
                                         loadAllTasks()
                                     }
-                                }, CourseColorManager.getAllColors())
+                                }, CourseColorManager.getAllColors(), { task ->
+
+                                    val taskRef = db.collection("users").document(userId)
+                                        .collection("courses").document(task.courseId)
+                                        .collection("tasks").document(task.taskName)
+
+                                    taskRef.delete().addOnSuccessListener {
+                                        Toast.makeText(this, "Deleted ${task.taskName}", Toast.LENGTH_SHORT).show()
+                                        val adapter = recyclerView.adapter as? TaskAdapter
+                                        val index = adapter?.tasks?.indexOfFirst {
+                                            it.courseId == task.courseId && it.taskName == task.taskName
+                                        } ?: -1
+
+                                        if (index != -1) {
+                                            adapter?.tasks?.removeAt(index)
+                                            adapter?.notifyItemRemoved(index)
+                                        }
+
+                                    }.addOnFailureListener {
+                                        Toast.makeText(this, "Failed to delete ${task.taskName}", Toast.LENGTH_SHORT).show()
+                                    }
+                                })
                             }
                         }
                 }
