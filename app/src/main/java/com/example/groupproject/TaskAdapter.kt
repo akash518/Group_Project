@@ -28,7 +28,6 @@ class TaskAdapter(
         val taskName: TextView = view.findViewById(R.id.taskName)
         val dueDate: TextView = view.findViewById(R.id.dueDate)
         val complete: ImageButton = view.findViewById(R.id.complete)
-        val card: CardView = view as CardView
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -47,6 +46,17 @@ class TaskAdapter(
             onTaskCompleted(task)
         }
 
+        if (task.isCompleted) {
+            holder.complete.setColorFilter(Color.LTGRAY)
+            holder.complete.isEnabled = false
+            holder.complete.setOnClickListener(null)
+        } else {
+            holder.complete.clearColorFilter()
+            holder.complete.isEnabled = true
+            holder.complete.setOnClickListener {
+                onTaskCompleted(task)
+            }
+        }
     }
 
     override fun getItemCount(): Int = tasks.size
