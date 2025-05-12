@@ -207,8 +207,8 @@ class HomeModel(private val context: Context) {
     }
 
     fun checkAndSendReminders() {
-        val now = currentStartDate.time
-        val nextDay = (currentStartDate.clone() as Calendar).apply { add(Calendar.HOUR_OF_DAY, 24) }.time
+        val now = Calendar.getInstance().time
+        val nextDay = (Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 24) }).time
         val userEmail = auth.currentUser?.email?: return
         val tasks = getFilteredTasks(null).tasks
 
