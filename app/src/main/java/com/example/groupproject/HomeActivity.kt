@@ -376,6 +376,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateView(selectedCourseId: String?) {
+        Log.d("ReminderDebug", "updateView called")
         val isAllCourses = selectedCourseId == null
         val selectedStart = currentStartDate.time
         val selectedEnd = (currentStartDate.clone() as Calendar).apply {
@@ -397,6 +398,10 @@ class HomeActivity : AppCompatActivity() {
         }
 
         val now = Calendar.getInstance().time
+
+        checkAndSendReminders(weeklyTasks) //sending reminders
+
+
         val sortedTasks = filteredTasks.sortedWith(compareBy<Task> {
             when {
                 !it.isCompleted && it.dueDate != null && it.dueDate.before(now) -> 0 // Overdue
@@ -474,6 +479,68 @@ class HomeActivity : AppCompatActivity() {
                 }
         }, CourseColorManager.getAllColors())
     }
+
+    private fun checkAndSendReminders(tasks: List<Task>) {
+        val now = Calendar.getInstance().time
+        val oneDayLater = Calendar.getInstance().apply {
+            add(Calendar.HOUR_OF_DAY, 24)
+        }.time
+
+        val db = FirebaseFirestore.getInstance()
+        val user = FirebaseAuth.getInstance().currentUser
+        val userId = user?.uid
+        val userEmail = user?.email
+
+        if (userId != null && userEmail != null) {
+            for (task in tasks) {
+                Log.d("ReminderDebug", "Task: ${task.taskName}, Due: ${task.dueDate}, Now: $now, 24hLater: $oneDayLater, Completed: ${task.isCompleted}")
+
+                if (task.dueDate == null) {
+                    Log.w("ReminderDebug", "Task '${task.taskName}' has NULL dueDate")
+                }
+
+                if (!task.isCompleted && task.dueDate != null &&
+                    task.dueDate.after(now) && task.dueDate.before(oneDayLater)
+                ) {
+                    val taskRef = db.collection("users")
+                        .document(userId)
+                        .collection("courses")
+                        .document(task.courseId)
+                        .collection("tasks")
+                        .document(task.taskName)
+
+                    taskRef.get().addOnSuccessListener { doc ->
+                        val reminderSent = doc.getBoolean("reminderSent") ?: false
+
+                        if (!reminderSent) {
+                            Log.d("ReminderDebug", "Sending email now for task: ${task.taskName}")
+                            EmailUtils().sendEmailReminder(
+                                email = userEmail,
+                                subject = "Reminder: ${task.taskName} is due soon",
+                                text = "Your task '${task.taskName}' for course '${task.courseId}' is ${task.dueDateFormatted}."
+                            )
+                            taskRef.update("reminderSent", true)
+                        } else {
+                            Log.d("ReminderDebug", "Reminder already sent for task: ${task.taskName}")
+                        }
+                    }
+                } else {
+                    Log.d("ReminderDebug", "Skipping task '${task.taskName}' — already completed or not due within 24 hours.")
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val selected = courseSpinner.selectedItem?.toString() ?: "All Courses"
+        val selectedId = if (selected == "All Courses") null else selected
+
+        updateView(selectedId)
+    }
+
+
 
     private fun getStartOfWeek(date: Calendar): Calendar {
         val copy = date.clone() as Calendar
