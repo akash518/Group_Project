@@ -38,13 +38,20 @@ class CourseCreation(private val context: Context, private val onCourseAdded: ()
 
                 val db = FirebaseFirestore.getInstance()
                 val coursesRef = db.collection("users").document(userId).collection("courses")
-                val courseRef = coursesRef.document(courseName)
                 val colorPalette = CourseColorManager.colorPalette
 
-                coursesRef.get().addOnSuccessListener { existingCourse ->
-                    val usedColors = existingCourse.mapNotNull { it.getString("color") }.toSet()
+                coursesRef.get().addOnSuccessListener { course ->
+                    val courseExists = course.documents.any {doc ->
+                        doc.id.equals(courseName, ignoreCase = true)
+                    }
+                    if (courseExists) {
+                        Toast.makeText(context,"$courseName already exists", Toast.LENGTH_SHORT).show()
+                        return@addOnSuccessListener
+                    }
+                    val courseRef = coursesRef.document(courseName)
+                    val usedColors = course.mapNotNull { it.getString("color") }.toSet()
                     val availableColor = colorPalette.firstOrNull { it !in usedColors }
-                        ?: colorPalette[existingCourse.size() % colorPalette.size]
+                        ?: colorPalette[course.size() % colorPalette.size]
 
                     val courseData = mapOf(
                         "progress" to 0f,
@@ -62,7 +69,6 @@ class CourseCreation(private val context: Context, private val onCourseAdded: ()
                                 }
                         }
 
-                        // Then add the real course
                         courseRef.set(courseData).addOnSuccessListener {
                             Toast.makeText(context, "Course added", Toast.LENGTH_SHORT).show()
                             onCourseAdded()

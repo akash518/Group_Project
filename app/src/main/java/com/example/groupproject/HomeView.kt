@@ -15,6 +15,8 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.abs
 
 class HomeView : AppCompatActivity() {
@@ -29,7 +31,6 @@ class HomeView : AppCompatActivity() {
     private lateinit var dateRange: TextView
     private lateinit var addCourse: Button
     private lateinit var createTask: Button
-
     private lateinit var dateRangeGestureDetector: GestureDetector
     private lateinit var viewGestureDetector: GestureDetector
 
@@ -214,10 +215,21 @@ class HomeView : AppCompatActivity() {
     }
 
     fun updateTaskList(tasks: List<Task>) {
-        taskRecyclerView.adapter = TaskAdapter(
-            tasks.toMutableList(),
+        val auth = FirebaseAuth.getInstance()
+        val db = FirebaseFirestore.getInstance()
+        val userId = auth.currentUser?.uid
+        taskRecyclerView.adapter = TaskAdapter(tasks.toMutableList(),
             { task -> controller.onTaskCompleted(task) },
-            CourseColorManager.getAllColors()
+            CourseColorManager.getAllColors(),
+            {task ->
+                val index = tasks.indexOfFirst {
+                    it.courseId == task.courseId && it.taskName == task.taskName
+                }
+                if (index != -1) {
+                    controller.onTaskDeleted(task)
+                    taskRecyclerView.adapter?.notifyItemRemoved(index)
+                }
+            }
         )
     }
 

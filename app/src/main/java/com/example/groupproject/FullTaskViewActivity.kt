@@ -35,8 +35,6 @@ class FullTaskViewActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "All Tasks"
 
-
-
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -180,8 +178,16 @@ class FullTaskViewActivity : AppCompatActivity() {
 
                                     taskRef.delete().addOnSuccessListener {
                                         Toast.makeText(this, "Deleted ${task.taskName}", Toast.LENGTH_SHORT).show()
-                                        allTasks.remove(task)
-                                        recyclerView.adapter?.notifyDataSetChanged()
+                                        val adapter = recyclerView.adapter as? TaskAdapter
+                                        val index = adapter?.tasks?.indexOfFirst {
+                                            it.courseId == task.courseId && it.taskName == task.taskName
+                                        } ?: -1
+
+                                        if (index != -1) {
+                                            adapter?.tasks?.removeAt(index)
+                                            adapter?.notifyItemRemoved(index)
+                                        }
+
                                     }.addOnFailureListener {
                                         Toast.makeText(this, "Failed to delete ${task.taskName}", Toast.LENGTH_SHORT).show()
                                     }

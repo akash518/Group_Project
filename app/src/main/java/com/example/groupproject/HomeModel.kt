@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -103,6 +104,22 @@ class HomeModel(private val context: Context) {
         taskRef.update("completed", true)
             .addOnSuccessListener { controller.handleCompletedTask() }
             .addOnFailureListener { controller.handleError("Failed to update task") }
+    }
+
+    fun deleteTask(task: Task) {
+        val userId = auth.currentUser?.uid ?: return
+        val taskRef = db.collection("users").document(userId)
+            .collection("courses").document(task.courseId)
+            .collection("tasks").document(task.taskName)
+
+        taskRef.delete()
+            .addOnSuccessListener {
+                allTasks.remove(task)
+                controller.handleDeletedTask(task.taskName)
+            }
+            .addOnFailureListener {
+                controller.handleError("Failed to delete ${task.taskName}")
+            }
     }
 
     fun getAllTasks(): List<Task> = allTasks

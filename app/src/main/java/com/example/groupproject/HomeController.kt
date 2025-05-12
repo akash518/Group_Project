@@ -96,6 +96,11 @@ class HomeController(private val context: Context, private val model: HomeModel,
         view.showSuccess("Task marked as complete")
     }
 
+    fun handleDeletedTask(task: String) {
+        model.loadProgress()
+        view.showSuccess("Deleted $task")
+    }
+
     fun handleAuth() {
         showLoginDialog()
     }
@@ -147,6 +152,10 @@ class HomeController(private val context: Context, private val model: HomeModel,
         model.markTaskComplete(task)
     }
 
+    fun onTaskDeleted(task: Task) {
+        model.deleteTask(task)
+    }
+
     fun onAddCourseClicked() {
         view.getAdController().showAdBeforeAddingCourse(context as Activity) {
             view.showCourseCreationDialog {
@@ -187,9 +196,9 @@ class HomeController(private val context: Context, private val model: HomeModel,
     }
 
     private fun getCourseList(): List<String> {
-        return model.getCourseProgressList().map { it.courseId }.filter {
-            it != "No Courses" && it != "placeholder" && it.isNotBlank()
-        }
+        return model.getCourseProgressList().map { it.courseId }
+            .filter { it != "No Courses" && it != "placeholder" && it.isNotBlank() }
+            .sorted()
     }
 
     fun refresh() {

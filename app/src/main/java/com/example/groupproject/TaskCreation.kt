@@ -124,6 +124,9 @@ class TaskCreation(private val context: Context, private val courseList: List<St
                 .addOnSuccessListener {
                     Toast.makeText(context, "Task created", Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
+                    val prefs = context.getSharedPreferences("AdPrefs", Context.MODE_PRIVATE)
+                    val added = prefs.getInt("tasksAdded", 0)
+                    prefs.edit().putInt("tasksAdded", added+1).apply()
                     onTaskCreated()
                 }
                 .addOnFailureListener {
