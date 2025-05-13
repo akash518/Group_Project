@@ -94,10 +94,11 @@ class CourseCreation(private val context: Context, private val onCourseAdded: ()
                         // Save the new course data
                         courseRef.set(courseData).addOnSuccessListener {
                             Toast.makeText(context, "Course added", Toast.LENGTH_SHORT).show()
-                            onCourseAdded()
-                            // Reset internal course tracking state in preferences
+                            // Track how many courses have been added for ad logic
                             val prefs = context.getSharedPreferences("AdPrefs", Context.MODE_PRIVATE)
-                            prefs.edit().putInt("numberOfCourses", 0).apply()
+                            val added = prefs.getInt("coursesAdded", 0)
+                            prefs.edit().putInt("coursesAdded", added+1).apply()
+                            onCourseAdded()
                         }.addOnFailureListener {
                             Toast.makeText(context, "Failed to add course", Toast.LENGTH_SHORT).show()
                         }
