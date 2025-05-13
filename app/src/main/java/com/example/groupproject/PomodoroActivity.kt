@@ -2,6 +2,7 @@ package com.example.groupproject
 
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -57,17 +58,26 @@ class PomodoroActivity : AppCompatActivity() {
 
 //        Button Listeners
         startButton.setOnClickListener {
+            Log.d("PomodoroDebug", "START clicked. isTimerRunning=$isTimerRunning, remainingTimeInMillis=$remainingTimeInMillis")
+
             if (isTimerRunning) {
                 // Pause
                 timer?.cancel()
                 isTimerRunning = false
                 startButton.text = getString(R.string.resume)
+                Log.d("PomodoroDebug", "TIMER PAUSED")
             } else {
                 //start from beginning
                 if (remainingTimeInMillis <= 0L) {
+                    if (customizeCheckBox.isChecked) {
+                        durationSelected = seekBar.progress.coerceAtLeast(1)
+                    }
+                    remainingTimeInMillis = durationSelected * 60 * 1000L
+                    Log.d("PomodoroDebug", "TIMER STARTING FRESH via startPomodoro()")
                     startPomodoro()
 
                 }else{
+                    Log.d("PomodoroDebug", "TIMER STARTING FROM REMAINING TIME: $remainingTimeInMillis")
                     timer = PomodoroTimer(remainingTimeInMillis).start()
                     isTimerRunning = true
                 }
@@ -79,8 +89,14 @@ class PomodoroActivity : AppCompatActivity() {
             timer?.cancel()
             startButton.text = getString(R.string.start_pomodoro)
             isTimerRunning = false
-            remainingTimeInMillis = durationSelected * 60 * 1000L
+            if (customizeCheckBox.isChecked) {
+                durationSelected = seekBar.progress.coerceAtLeast(1)
+            }else {
+                durationSelected = 25
+            }
+            remainingTimeInMillis = 0L
             timerText.text = String.format("%02d:00", durationSelected)
+            Log.d("PomodoroDebug", "RESET: durationSelected=$durationSelected, remainingTimeInMillis=$remainingTimeInMillis")
         }
     }
 
@@ -90,6 +106,10 @@ class PomodoroActivity : AppCompatActivity() {
      */
     private fun startPomodoro(){
         var durationInMinutes = 0
+        if (customizeCheckBox.isChecked) {
+            durationSelected = seekBar.progress.coerceAtLeast(1)
+        }
+
         if(isWorkSession){
             durationInMinutes = durationSelected
             status.text = getString(R.string.work_session)
@@ -103,6 +123,8 @@ class PomodoroActivity : AppCompatActivity() {
         remainingTimeInMillis = durationInMinutes * 60 * 1000L
         timer = PomodoroTimer(remainingTimeInMillis).start()
         isTimerRunning = true
+        Log.d("PomodoroDebug", "START POMODORO: durationInMinutes=$durationInMinutes, remainingTimeInMillis=$remainingTimeInMillis")
+
     }
 
     override fun onDestroy() {
