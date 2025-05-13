@@ -20,6 +20,7 @@
             android:text="@string/task_tracker"
             android:textSize="36sp"
             android:textStyle="bold"
+            style="@style/TextStyle"
 
             android:gravity="center" />
 
@@ -42,6 +43,7 @@
         android:text="@string/date_range"
         android:textSize="20sp"
         android:textStyle="bold"
+        style="@style/TextStyle"
 
         android:gravity="center"
         android:layout_below="@id/TitleMenuBar"

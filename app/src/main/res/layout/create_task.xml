@@ -16,7 +16,8 @@
 
             android:text="@string/title"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            style="@style/TextStyle"/>
 
         <Button
             android:layout_width="30dp"
@@ -48,6 +49,7 @@
         android:text="@string/due_date"
         android:textSize="24sp"
         android:textStyle="bold"
+        style="@style/TextStyle"
 
         android:layout_marginTop="10dp"/>
 
@@ -96,6 +98,7 @@
         android:text="@string/course"
         android:textSize="24sp"
         android:textStyle="bold"
+        style="@style/TextStyle"
 
         android:layout_marginTop="10dp"/>
 
@@ -120,7 +123,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="@string/save"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/white"
         android:backgroundTint="#797d7f"
         android:enabled="false"
         android:background="@drawable/save_button" />
