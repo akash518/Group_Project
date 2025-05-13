@@ -15,18 +15,25 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.log
 
+/**
+ * Controller for Home screen.
+ * Handles user authentication, gesture actions, course/task interactions, and passes results between model and view.
+ */
 class HomeController(private val context: Context, private val model: HomeModel, private val view: HomeView) {
     private var selectedCourseId: String? = null
 
     init {
+        // Let the model know which controller it should call back to
         model.setController(this)
     }
 
+    /** Controller initialization */
     fun initialize() {
         Log.d("DEBUG", "Controller.initialize() called")
         checkUserAuth()
     }
 
+    /** Checks if user is authenticated and whether the account setup is complete */
     private fun checkUserAuth() {
         Log.d("DEBUG", "checkUserAuthentication() called")
         val prefs = context.getSharedPreferences("TaskTrackerPrefs", Context.MODE_PRIVATE)
@@ -36,11 +43,13 @@ class HomeController(private val context: Context, private val model: HomeModel,
         Log.d("DEBUG", "accountSetupComplete: ${prefs.getBoolean("accountSetupComplete", false)}")
         Log.d("DEBUG", "saved email: ${prefs.getString("email", null)}")
 
+        // If user is not logged in, show login dialog
         if (user == null) {
             showLoginDialog()
             return
         }
 
+        // Refresh ID token and proceed if valid
         user.getIdToken(true).addOnCompleteListener { token ->
             if (token.isSuccessful) {
                 val setupComplete = prefs.getBoolean("accountSetupComplete", false)
@@ -57,6 +66,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
         }
     }
 
+    /** Validates if the Firestore user doc exists - logs out if not */
     private fun validateUser(userId: String, prefs: android.content.SharedPreferences, auth: FirebaseAuth) {
         val db = FirebaseFirestore.getInstance()
 
@@ -76,37 +86,45 @@ class HomeController(private val context: Context, private val model: HomeModel,
             }
     }
 
+    /** Shows login dialog and reinitializes controller once logged in */
     private fun showLoginDialog() {
         view.showLoginDialog {
             initialize()
         }
     }
 
+    /** Called by model when data is ready */
     fun handleData(courses: List<CourseProgress>, tasks: List<Task>) {
         updateSpinner(courses)
         updateView()
     }
 
+    /** Shows any errors from the model */
     fun handleError(message: String) {
         view.showError(message)
     }
 
+    /** Called when a task is marked completed */
     fun handleCompletedTask() {
         model.loadProgress() // Reload data to refresh progress
         view.showSuccess("Task marked as complete")
     }
 
+    /** Called when a task is deleted */
     fun handleDeletedTask(task: String) {
         model.loadProgress()
         view.showSuccess("Deleted $task")
     }
 
+    /** Re-authenticate the user if needed */
     fun handleAuth() {
         showLoginDialog()
     }
 
+    /** Populates the course spinner in the UI with available courses */
     private fun updateSpinner(courses: List<CourseProgress>) {
         val spinnerItems = mutableListOf("All Courses")
+        // Filter out placeholder and sort courses alphabetically
         val sortedCourseIds = courses.map { it.courseId }
             .filter { it != "placeholder" && it != "No Courses" }
             .sorted()
@@ -114,6 +132,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
         view.updateCourseSpinner(spinnerItems)
     }
 
+    /** Updates progress bars, task list, and date range in the UI */
     private fun updateView() {
         view.updateDateRange(model.getDateRange())
         val filteredData = model.getFilteredTasks(selectedCourseId)
@@ -127,33 +146,35 @@ class HomeController(private val context: Context, private val model: HomeModel,
         model.checkAndSendReminders()
     }
 
-    private fun onAuthSuccess() {
-        model.loadProgress()
-    }
-
+    /** Called when the user selects a course from the spinner */
     fun onCourseSelected(courseId: String?) {
         selectedCourseId = courseId
         updateView()
     }
 
+    /** User swiped to go to next week */
     fun onSwipeLeft() {
         model.goToNextWeek()
         updateView()
     }
 
+    /** User swiped to go to previous week */
     fun onSwipeRight() {
         model.goToPreviousWeek()
         updateView()
     }
 
+    /** Mark a task as completed */
     fun onTaskCompleted(task: Task) {
         model.markTaskComplete(task)
     }
 
+    /** Delete a task */
     fun onTaskDeleted(task: Task) {
         model.deleteTask(task)
     }
 
+    /** Show course creation dialog after ad when applicable */
     fun onAddCourseClicked() {
         view.getAdController().showAdBeforeAddingCourse(context as Activity) {
             view.showCourseCreationDialog {
@@ -162,6 +183,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
         }
     }
 
+    /** Show task creation dialog after ad when applicable */
     fun onCreateTaskClicked() {
         val courses = getCourseList()
         view.getAdController().showAdBeforeAddingTask(context as Activity) {
@@ -171,6 +193,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
         }
     }
 
+    /** Log the user out and clear saved preferences */
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
         val prefs = context.getSharedPreferences("TaskTrackerPrefs", Context.MODE_PRIVATE)
@@ -178,27 +201,32 @@ class HomeController(private val context: Context, private val model: HomeModel,
         showLoginDialog()
     }
 
+    /** Navigates to the Pomodoro activity */
     fun onPomodoroNavigation() {
         val intent = Intent(context, PomodoroActivity::class.java)
         view.navigateToActivity(intent, R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
+    /** Navigates to the full task view screen */
     fun onFullTasksNavigation() {
         val intent = Intent(context, FullTaskViewActivity::class.java)
         view.navigateToActivity(intent, R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
+    /** Navigates to the course management screen */
     fun onManageCoursesNavigation() {
         val intent = Intent(context, ManageCourses::class.java)
         view.navigateToActivity(intent, R.anim.slide_in_left, R.anim.slide_out_right)
     }
 
+    /** Get a list of course IDs for task creation dialog */
     private fun getCourseList(): List<String> {
         return model.getCourseProgressList().map { it.courseId }
             .filter { it != "No Courses" && it != "placeholder" && it.isNotBlank() }
             .sorted()
     }
 
+    /** Forces a data refresh and reminder check */
     fun refresh() {
         model.loadProgress()
         model.checkAndSendReminders()

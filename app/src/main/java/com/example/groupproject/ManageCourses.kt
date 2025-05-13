@@ -18,6 +18,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.abs
 
+/**
+ * Activity for managing courses the user has created.
+ * Displays a list of courses with delete buttons.
+ * Swipe right to return to the previous screen.
+ */
 class ManageCourses : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -93,6 +98,9 @@ class ManageCourses : AppCompatActivity() {
         loadCourses()
     }
 
+    /**
+     * Loads the user's course names from Firestore, sets colors, and populates the RecyclerView.
+     */
     private fun loadCourses() {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users").document(userId).collection("courses")
@@ -105,6 +113,7 @@ class ManageCourses : AppCompatActivity() {
                     courses.add(courseId)
                 }
 
+                // Create adapter with delete handler
                 adapter = CourseAdapter(courses, CourseColorManager.getAllColors()) { courseId ->
                     confirmDelete(courseId)
                 }
@@ -112,6 +121,10 @@ class ManageCourses : AppCompatActivity() {
             }
     }
 
+    /**
+     * Shows a confirmation dialog before deleting a course.
+     * @param courseId The ID of the course to delete.
+     */
     private fun confirmDelete(courseId: String) {
         AlertDialog.Builder(this)
             .setTitle("Delete Course")
@@ -121,6 +134,10 @@ class ManageCourses : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * Deletes a course document from Firestore and removes it from the view.
+     * @param courseId The ID of the course to delete.
+     */
     private fun deleteCourse(courseId: String) {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users").document(userId).collection("courses").document(courseId)

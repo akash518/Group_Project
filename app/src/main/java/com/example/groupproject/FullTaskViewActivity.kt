@@ -21,6 +21,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.abs
 
+/**
+ * Displays all tasks from all courses in a scrollable list.
+ * Supports swipe gestures to navigate back or go to ManageCourses.
+ */
 class FullTaskViewActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -32,9 +36,11 @@ class FullTaskViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable "back" arrow and set title on the action bar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "All Tasks"
 
+        // Create vertical layout programmatically
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -43,6 +49,7 @@ class FullTaskViewActivity : AppCompatActivity() {
             )
         }
 
+        // Title TextView at the top
         val titleTextView = TextView(this).apply {
             text = context.getString(R.string.all_tasks)
             textSize = 24f
@@ -50,8 +57,8 @@ class FullTaskViewActivity : AppCompatActivity() {
             setPadding(0, 50, 0, 30)
         }
 
+        // Gesture detector to handle swipes left and right
         val gestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
-            private val swipeThreshold = 100
             private val swipeVelocityThreshold = 100
 
             override fun onFling(p0: MotionEvent?, p1: MotionEvent, p2: Float, p3: Float): Boolean {
@@ -60,8 +67,10 @@ class FullTaskViewActivity : AppCompatActivity() {
                 val diffY = p1.y - p0.y
                 if (abs(diffX) > abs(diffY)) {
                     if (diffX > 0 && abs(p2) > swipeVelocityThreshold) {
+                        // Swipe right -> go back
                         finish()
                     } else {
+                        // Swipe left -> go to ManageCourses screen
                         startActivity(Intent(this@FullTaskViewActivity, ManageCourses::class.java))
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                             overrideActivityTransition(
@@ -80,12 +89,14 @@ class FullTaskViewActivity : AppCompatActivity() {
             }
         })
 
+        // Attach gesture detection to the full screen
         val rootView = findViewById<View>(android.R.id.content)
         rootView.setOnTouchListener {_, event ->
             gestureDetector.onTouchEvent(event)
             true
         }
 
+        // Create and configure RecyclerView for showing tasks
         recyclerView = RecyclerView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -95,27 +106,36 @@ class FullTaskViewActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@FullTaskViewActivity)
         }
 
+        // Pass touch events on RecyclerView to gesture detector
         recyclerView.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             false
         }
 
+        // Add views to the layout and display
         rootLayout.addView(titleTextView)
         rootLayout.addView(recyclerView)
         setContentView(rootLayout)
 
+        // Load all tasks from Firebase
         loadAllTasks()
     }
 
+    // Handles action bar back arrow click
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
     }
 
+    /**
+     * Loads all tasks from all courses belonging to the user.
+     * Sorts them by status and due date, then displays them in the RecyclerView.
+     */
     private fun loadAllTasks() {
         val userId = auth.currentUser?.uid ?: return
         allTasks.clear()
 
+        // Get all user's courses
         db.collection("users").document(userId).collection("courses")
             .get().addOnSuccessListener { courses ->
                 var loadedCourses = 0
@@ -123,9 +143,11 @@ class FullTaskViewActivity : AppCompatActivity() {
                 for (courseDoc in courses) {
                     val courseId = courseDoc.id
 
+                    // For each course, get its tasks
                     db.collection("users").document(userId).collection("courses")
                         .document(courseId).collection("tasks").get()
                         .addOnSuccessListener { tasks ->
+                            // Convert each document into a Task object
                             for (taskDoc in tasks) {
                                 val taskName = taskDoc.id
                                 val completed = taskDoc.getBoolean("completed") == true
@@ -151,6 +173,7 @@ class FullTaskViewActivity : AppCompatActivity() {
                                     }
                                 }.thenBy { it.dueDate }) // Optional within-group sorting
 
+                                // Load each course's color from Firestore
                                 val distinctCourses = allTasks.map { it.courseId }.distinct()
                                 for (courseId in distinctCourses) {
                                     db.collection("users").document(userId).collection("courses")
@@ -161,8 +184,10 @@ class FullTaskViewActivity : AppCompatActivity() {
                                         }
                                 }
 
+                                // Set the RecyclerView adapter to show tasks
                                 recyclerView.adapter = TaskAdapter(sortedTasks.toMutableList(), { task ->
-                                val taskRef = db.collection("users").document(userId)
+                                    // Mark task complete
+                                    val taskRef = db.collection("users").document(userId)
                                         .collection("courses").document(task.courseId)
                                         .collection("tasks").document(task.taskName)
 
@@ -177,8 +202,10 @@ class FullTaskViewActivity : AppCompatActivity() {
                                         .collection("courses").document(task.courseId)
                                         .collection("tasks").document(task.taskName)
 
+                                    // Delete task
                                     taskRef.delete().addOnSuccessListener {
                                         Toast.makeText(this, "Deleted ${task.taskName}", Toast.LENGTH_SHORT).show()
+                                        // Remove from adapter without refreshing full list
                                         val adapter = recyclerView.adapter as? TaskAdapter
                                         val index = adapter?.tasks?.indexOfFirst {
                                             it.courseId == task.courseId && it.taskName == task.taskName

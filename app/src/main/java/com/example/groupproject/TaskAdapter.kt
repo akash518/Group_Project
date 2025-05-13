@@ -10,6 +10,14 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Date
 
+/**
+ * Data class representing a task associated with a course.
+ * @param courseId The name/ID of the course this task belongs to
+ * @param taskName The name of the task
+ * @param isCompleted Whether the task is marked complete
+ * @param dueDateFormatted A human-readable due date string
+ * @param dueDate The actual Date object for internal logic/sorting
+ */
 data class Task(
     val courseId: String,
     val taskName: String,
@@ -18,12 +26,19 @@ data class Task(
     val dueDate: Date?
 )
 
+/**
+ * RecyclerView adapter that displays a list of tasks with associated course info,
+ * due dates, colors, and a completion button.
+ */
 class TaskAdapter(
     val tasks: MutableList<Task>,
     private val onTaskCompleted: (Task) -> Unit,
     private val courseColors: Map<String, Int>,
     private val onTaskLongPressed: (Task) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+    /**
+     * ViewHolder class to hold references to task layout views.
+     */
     class TaskViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val courseName: TextView = view.findViewById(R.id.courseName)
         val taskName: TextView = view.findViewById(R.id.taskName)
@@ -32,11 +47,17 @@ class TaskAdapter(
         val card: CardView = view as CardView
     }
 
+    /**
+     * Inflates a task item layout and creates a ViewHolder for it.
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.task, parent, false)
         return TaskViewHolder(view)
     }
 
+    /**
+     * Binds data from a Task object into the corresponding ViewHolder.
+     */
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = tasks[position]
         holder.courseName.text = task.courseId

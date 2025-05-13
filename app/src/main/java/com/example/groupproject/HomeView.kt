@@ -19,7 +19,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.abs
 
+/**
+ * View for the Home screen.
+ * Initializes UI components, handles user interaction, and communicates with the HomeController.
+ */
 class HomeView : AppCompatActivity() {
+    // Home screen components
     private lateinit var controller: HomeController
     private lateinit var model: HomeModel
     private lateinit var adController: AdController
@@ -31,6 +36,7 @@ class HomeView : AppCompatActivity() {
     private lateinit var dateRange: TextView
     private lateinit var addCourse: Button
     private lateinit var createTask: Button
+    // Gesture detectors
     private lateinit var dateRangeGestureDetector: GestureDetector
     private lateinit var viewGestureDetector: GestureDetector
 
@@ -65,6 +71,7 @@ class HomeView : AppCompatActivity() {
         createTask = findViewById(R.id.createTask)
     }
 
+    /** Sets up swipe gestures for date range and full-view transitions */
     private fun setupGestureDetectors() {
         dateRangeGestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
             private val swipeThreshold = 100
@@ -110,6 +117,7 @@ class HomeView : AppCompatActivity() {
         })
     }
 
+    /** Sets listeners for user actions */
     @SuppressLint("ClickableViewAccessibility")
     private fun setupEventListeners() {
         menu.setOnClickListener { view ->
@@ -186,9 +194,12 @@ class HomeView : AppCompatActivity() {
         }
     }
 
-    // Public methods that the controller calls to update the view
+    // --Update View Functions--
+
     fun updateCourseSpinner(courses: List<String>) {
+        // Create a dropdown adapter using the custom spinner layout and the course list
         val adapter = ArrayAdapter(this, R.layout.spinner_item, courses)
+        // Set the layout to use for the dropdown menu of the spinner
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         courseSpinner.adapter = adapter
     }
@@ -197,16 +208,30 @@ class HomeView : AppCompatActivity() {
         this.dateRange.text = dateRange
     }
 
+    /**
+     * Updates the progress rings and central percentage display.
+     * Called when task data is filtered or new data is loaded.
+     * @param progress List of progress values for each course
+     * @param selectedCourseId Currently selected course ID (or null for "All Courses")
+     * @param completedCount Number of completed tasks this week
+     * @param totalCount Total number of tasks this week
+     */
     fun updateProgress(progress: List<CourseProgress>, selectedCourseId: String?, completedCount: Int, totalCount: Int) {
+        // Update the color scheme for each course ring
         progressRings.setCourseColors(CourseColorManager.getAllColors())
+        // Set the current progress percentages for the rings
         progressRings.updateProgress(progress)
+        // Visually highlight the selected course ring
         progressRings.setSelectedCourse(selectedCourseId)
 
+        // Calculate overall percentage of tasks completed this week
         val percent = if (totalCount > 0) (completedCount * 100 / totalCount) else 0
         val percentStr = "$percent%"
         val detailStr = "\n$completedCount/$totalCount\nComplete"
 
+        // Combine into a single string
         val spannable = android.text.SpannableString(percentStr + detailStr)
+        // Make the percentage value larger
         spannable.setSpan(
             android.text.style.RelativeSizeSpan(1.8f),
             0,
@@ -217,9 +242,6 @@ class HomeView : AppCompatActivity() {
     }
 
     fun updateTaskList(tasks: List<Task>) {
-        val auth = FirebaseAuth.getInstance()
-        val db = FirebaseFirestore.getInstance()
-        val userId = auth.currentUser?.uid
         taskRecyclerView.adapter = TaskAdapter(tasks.toMutableList(),
             { task -> controller.onTaskCompleted(task) },
             CourseColorManager.getAllColors(),
@@ -235,7 +257,7 @@ class HomeView : AppCompatActivity() {
         )
     }
 
-    // Dialog methods
+    // --Dialog Functions--
     fun showLoginDialog(onSuccess: () -> Unit) {
         CreateAccount(onSuccess).show(supportFragmentManager, "CreateAccountDialog")
     }
@@ -248,7 +270,7 @@ class HomeView : AppCompatActivity() {
         TaskCreation(this, courses, onTaskCreated).show()
     }
 
-    // Feedback methods
+    // --Feedback Functions--
     fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
@@ -257,6 +279,7 @@ class HomeView : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
+    // Navigation function to implement transitions
     fun navigateToActivity(intent: Intent, enterAnim: Int, exitAnim: Int) {
         startActivity(intent)
 
@@ -274,15 +297,24 @@ class HomeView : AppCompatActivity() {
 
     fun getAdController(): AdController = adController
 
-    // Touch handling for hiding keyboard
+    /**
+     * Automatically hides the soft keyboard when the user taps outside of an EditText field.
+     * @param ev The motion event (e.g., a tap or swipe)
+     * @return Boolean indicating whether the event was consumed
+     */
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN) {
+            // Get the currently focused view
             val v = currentFocus
             if (v is EditText) {
                 val outRect = Rect()
+                // Get the visible bounds of the EditText
                 v.getGlobalVisibleRect(outRect)
+                // If the tap is outside the bounds of the EditText
                 if (!outRect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                    // Clear focus from the EditText
                     v.clearFocus()
+                    // Hide the soft keyboard
                     val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(v.windowToken, 0)
                 }
@@ -291,6 +323,7 @@ class HomeView : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
+    /** Refreshes view when returning from another activity */
     override fun onResume() {
         super.onResume()
         if (firstResume) {

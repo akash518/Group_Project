@@ -12,19 +12,25 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+/**
+ * Model for Home screen
+ * Handles Firebase data fetching, task filtering, progress calculation, and reminder emails.
+ */
 class HomeModel(private val context: Context) {
     private lateinit var controller: HomeController
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    private val allTasks = mutableListOf<Task>()
-    private var courseProgressList = listOf<CourseProgress>()
-    private var currentStartDate: Calendar = getStartOfWeek(Calendar.getInstance())
+    private val allTasks = mutableListOf<Task>() // List of all tasks loaded from Firebase
+    private var courseProgressList = listOf<CourseProgress>() // List of course progress percentages
+    private var currentStartDate: Calendar = getStartOfWeek(Calendar.getInstance()) // Sunday of current week
 
+    /** Connect controller */
     fun setController(controller: HomeController) {
         this.controller = controller
     }
 
+    /** Loads all courses and tasks, calculates progress, and updates controller */
     fun loadProgress() {
         Log.d("DEBUG", "loadProgressFromFirebase() called")
         val userId = auth.currentUser?.uid
@@ -38,6 +44,7 @@ class HomeModel(private val context: Context) {
             allTasks.clear()
             courseProgressList = listOf()
 
+            // No courses exist
             if (courseDocs.isEmpty) {
                 courseProgressList = listOf(CourseProgress("No Courses", 0f))
                 allTasks.clear()
@@ -50,6 +57,7 @@ class HomeModel(private val context: Context) {
             val totalCourses = courseDocs.size()
             var loadedCourses = 0
 
+            // For each course, load its tasks and calculate progress
             for (courseDoc in courseDocs) {
                 val courseId = courseDoc.id
                 val taskRef = courseRef.document(courseId).collection("tasks")
@@ -66,6 +74,7 @@ class HomeModel(private val context: Context) {
                     courseRef.document(courseId).update("progress", progress)
                     progressList.add(CourseProgress(courseId, progress))
 
+                    // Build task objects
                     for (task in tasks) {
                         val taskName = task.id
                         val timestamp = task.getTimestamp("dueDate")
@@ -82,7 +91,7 @@ class HomeModel(private val context: Context) {
 
                     loadedCourses++
                     if (loadedCourses == totalCourses) {
-                        Log.d("HomeActivity", "Finished loading all courses")
+                        Log.d("HomeModel", "Finished loading all courses")
                         courseProgressList = progressList
                         controller.handleData(courseProgressList, allTasks)
                     }
@@ -95,6 +104,7 @@ class HomeModel(private val context: Context) {
         }
     }
 
+    /** Marks a task as completed in Firebase */
     fun markTaskComplete(task: Task) {
         val userId = auth.currentUser?.uid ?: return
         val taskRef = db.collection("users").document(userId)
@@ -106,6 +116,7 @@ class HomeModel(private val context: Context) {
             .addOnFailureListener { controller.handleError("Failed to update task") }
     }
 
+    /** Deletes a task and updates controller */
     fun deleteTask(task: Task) {
         val userId = auth.currentUser?.uid ?: return
         val taskRef = db.collection("users").document(userId)
@@ -122,13 +133,12 @@ class HomeModel(private val context: Context) {
             }
     }
 
-    fun getAllTasks(): List<Task> = allTasks
+    // Helper methods
     fun getCourseProgressList(): List<CourseProgress> = courseProgressList
-
-    private fun getCurrentStartDate(): Calendar = currentStartDate
     fun goToPreviousWeek() { currentStartDate.add(Calendar.DATE, -7)}
     fun goToNextWeek() { currentStartDate.add(Calendar.DATE, 7)}
 
+    /** Resets time to start of week (Sunday at 12:00 AM) */
     private fun getStartOfWeek(date: Calendar): Calendar {
         val copy = date.clone() as Calendar
         copy.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
@@ -139,6 +149,7 @@ class HomeModel(private val context: Context) {
         return copy
     }
 
+    /** Returns a string like for current week */
     fun getDateRange(): String {
         val sdf = SimpleDateFormat("MMM d", Locale.US)
         val start = sdf.format(currentStartDate.time)
@@ -148,6 +159,10 @@ class HomeModel(private val context: Context) {
         return "$start to $end"
     }
 
+    /**
+     * Filters tasks by week and optionally by course.
+     * Calculates completion progress for that week.
+     */
     fun getFilteredTasks(selectedCourseId: String?): FilteredTasks {
         val isAllCourses = selectedCourseId == null
         val selectedStart = currentStartDate.time
@@ -155,14 +170,17 @@ class HomeModel(private val context: Context) {
             add(Calendar.DATE, 6)
         }.time
 
+        // All tasks due within this week
         val weeklyTasks = allTasks.filter { task ->
             task.dueDate != null && task.dueDate.after(selectedStart) && task.dueDate.before(selectedEnd)
         }
 
+        // Filtered further by course and exclude completed tasks
         val filteredTasks = weeklyTasks.filter { task ->
             (isAllCourses || task.courseId == selectedCourseId) && !task.isCompleted
         }
 
+        // Sort tasks
         val now = Calendar.getInstance().time
         val sortedTasks = filteredTasks.sortedWith(compareBy<Task> {
             when {
@@ -172,6 +190,7 @@ class HomeModel(private val context: Context) {
             }
         }.thenBy { it.dueDate })
 
+        // Map for progress: courseId -> (completedCount, totalCount)
         val courseData = mutableMapOf<String, Pair<Int, Int>>()
 
         for (task in weeklyTasks) {
@@ -184,6 +203,7 @@ class HomeModel(private val context: Context) {
             courseData[task.courseId] = updated
         }
 
+        // Update progress bar values for each course
         val updatedProgress = courseProgressList.map {course ->
             val (completed, total) = courseData[course.courseId]?: (0 to 0)
             val progress = if (total > 0) completed.toFloat() / total else 0f
@@ -206,6 +226,7 @@ class HomeModel(private val context: Context) {
         )
     }
 
+    /** Sends email reminders for tasks due within 24 hours (only once per task) */
     fun checkAndSendReminders() {
         val now = Calendar.getInstance().time
         val nextDay = (Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 24) }).time
@@ -252,6 +273,7 @@ class HomeModel(private val context: Context) {
     }
 }
 
+/** Wrapper data class returned from getFilteredTasks() */
 data class FilteredTasks(
     val tasks: List<Task>,
     val weeklyProgress: List<CourseProgress>,

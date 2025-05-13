@@ -12,6 +12,10 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
+/**
+ * Activity implementing a Pomodoro timer with optional duration customization,
+ * swipe-to-exit gesture, and break logic based on session count.
+ */
 class PomodoroActivity : AppCompatActivity() {
     private lateinit var status: TextView
     private lateinit var timerText: TextView
@@ -31,6 +35,9 @@ class PomodoroActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.pomodoro_timer)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "All Tasks"
 
         status = findViewById(R.id.status)
         timerText = findViewById(R.id.timer_text)
@@ -67,6 +74,7 @@ class PomodoroActivity : AppCompatActivity() {
                 startButton.text = "Pause"
             }
         }
+        // Reset button resets timer
         resetButton.setOnClickListener {
             timer?.cancel()
             startButton.text = "Start Pomodoro"
@@ -74,12 +82,12 @@ class PomodoroActivity : AppCompatActivity() {
             remainingTimeInMillis = durationSelected * 60 * 1000L
             timerText.text = String.format("%02d:00", durationSelected)
         }
-
-
-
     }
 
-//    changes duration according to status
+    /**
+     * Starts a new Pomodoro session.
+     * Applies long break every 4 sessions.
+     */
     private fun startPomodoro(){
         var durationInMinutes = 0
         if(isWorkSession){
@@ -102,7 +110,10 @@ class PomodoroActivity : AppCompatActivity() {
         timer?.cancel()
     }
 
-    //updating timer
+    /**
+     * Inner class managing the countdown logic.
+     * Updates UI each second and handles session switching.
+     */
     inner class PomodoroTimer(private val durationInMillis: Long) :
         CountDownTimer(durationInMillis, 1000){
 
@@ -123,7 +134,9 @@ class PomodoroActivity : AppCompatActivity() {
         }
         }
 
-    //
+    /**
+     * Checkbox listener for showing/hiding seek bar for custom time.
+     */
     inner class CheckListener : CompoundButton.OnCheckedChangeListener{
         override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
            if(isChecked){
@@ -136,7 +149,9 @@ class PomodoroActivity : AppCompatActivity() {
         }
     }
 
-    //handles when user customizes timer
+    /**
+     * SeekBar listener for setting custom Pomodoro duration.
+     */
     inner class SeekListener : SeekBar.OnSeekBarChangeListener{
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             if (progress < 1) {
@@ -157,6 +172,9 @@ class PomodoroActivity : AppCompatActivity() {
         return super.onTouchEvent(event)
     }
 
+    /**
+     * Handles swipe gesture: right to left finishes the activity.
+     */
     inner class SwipeGestureListener : GestureDetector.SimpleOnGestureListener() {
         private val SWIPE_THRESHOLD = 100
         private val SWIPE_VELOCITY_THRESHOLD = 100
@@ -176,20 +194,15 @@ class PomodoroActivity : AppCompatActivity() {
             ) {
                 if (diffX < 0) {
                     finish() //ends activity when user swipes right to left
-//                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-//                        overrideActivityTransition(
-//                            OVERRIDE_TRANSITION_CLOSE,
-//                            R.anim.slide_in_right,
-//                            R.anim.slide_out_left
-//                        )
-//                    } else {
-//                        @Suppress("DEPRECATION")
-//                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-//                    }
                 }
                 return true
             }
             return false
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
     }
 }
