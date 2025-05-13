@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Date
 
@@ -44,7 +43,6 @@ class TaskAdapter(
         val taskName: TextView = view.findViewById(R.id.taskName)
         val dueDate: TextView = view.findViewById(R.id.dueDate)
         val complete: ImageButton = view.findViewById(R.id.complete)
-        val card: CardView = view as CardView
     }
 
     /**

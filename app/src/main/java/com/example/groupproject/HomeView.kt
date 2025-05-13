@@ -2,7 +2,6 @@ package com.example.groupproject
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Build
@@ -15,8 +14,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.abs
 
 /**
@@ -47,7 +44,7 @@ class HomeView : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.homescreen)
 
-        model = HomeModel(this)
+        model = HomeModel()
         controller = HomeController(this, model, this)
         adController = AdController(this)
 
@@ -96,7 +93,6 @@ class HomeView : AppCompatActivity() {
         })
 
         viewGestureDetector = GestureDetector(this, object: GestureDetector.SimpleOnGestureListener() {
-            private val swipeThreshold = 100
             private val swipeVelocityThreshold = 100
 
             override fun onFling(p0: MotionEvent?, p1: MotionEvent, p2: Float, p3: Float): Boolean {

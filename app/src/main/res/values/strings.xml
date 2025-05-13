@@ -1,12 +1,9 @@
 <resources>
     <string name="app_name">Group Project</string>
-    <string name="tasks">Tasks</string>
     <string name="task_tracker">Task Tracker</string>
     <string name="date_range">Date Range</string>
     <string name="add_course">Add Course</string>
     <string name="email">Email</string>
-    <string name="left"><![CDATA[<]]></string>
-    <string name="right"><![CDATA[>]]></string>
     <string name="baseProgress">0%\n0/0\nComplete</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
@@ -24,6 +21,19 @@
     <string name="pomodoro_timer">Pomodoro Timer</string>
     <string name="course_title">Course Title</string>
     <string name="delete">Delete</string>
-    <string name="all_courses">All Courses</string>
     <string name="manage_courses">Manage Courses</string>
+    <string name="work_session">Work Session</string>
+    <string name="long_break">Long Break</string>
+    <string name="short_break">Short Break</string>
+    <string name="time">Time</string>
+    <string name="toggle_password_visibility">Toggle password visibility</string>
+    <string name="pomodoro">Pomodoro</string>
+    <string name="_25_00">25:00</string>
+    <string name="customize_timer_duration">Customize timer duration</string>
+    <string name="_25_minutes">25 minutes</string>
+    <string name="start_pomodoro">Start Pomodoro</string>
+    <string name="reset_pomodoro">Reset Pomodoro</string>
+    <string name="_11_59_pm">11:59 PM</string>
+    <string name="resume">Resume</string>
+    <string name="pause">Pause</string>
 </resources>

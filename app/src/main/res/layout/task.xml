@@ -35,7 +35,7 @@
                 android:textSize="14sp"
                 android:textColor="@color/black"
 
-                android:paddingVertical="1dp"/>/>
+                android:paddingVertical="1dp"/>
 
             <!--        Task Name-->
             <TextView

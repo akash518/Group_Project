@@ -48,7 +48,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:contentDescription="Toggle password visibility" />
+                android:contentDescription="@string/toggle_password_visibility" />
         </RelativeLayout>
 
         <Button

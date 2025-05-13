@@ -4,16 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.installations.installations
-import java.text.SimpleDateFormat
-import java.util.Locale
-import kotlin.math.log
 
 /**
  * Controller for Home screen.
@@ -56,7 +48,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
                 val userId = user.uid
 
                 if (!setupComplete) {
-                    validateUser(userId, prefs, auth)
+                    validateUser(userId, prefs)
                 } else {
                     model.loadProgress()
                 }
@@ -67,7 +59,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
     }
 
     /** Validates if the Firestore user doc exists - logs out if not */
-    private fun validateUser(userId: String, prefs: android.content.SharedPreferences, auth: FirebaseAuth) {
+    private fun validateUser(userId: String, prefs: android.content.SharedPreferences) {
         val db = FirebaseFirestore.getInstance()
 
         db.collection("users").document(userId).get()
@@ -94,9 +86,10 @@ class HomeController(private val context: Context, private val model: HomeModel,
     }
 
     /** Called by model when data is ready */
-    fun handleData(courses: List<CourseProgress>, tasks: List<Task>) {
+    fun handleData(courses: List<CourseProgress>) {
         updateSpinner(courses)
         updateView()
+        model.checkAndSendReminders()
     }
 
     /** Shows any errors from the model */
@@ -143,7 +136,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
             totalCount = filteredData.total
         )
         view.updateTaskList(filteredData.tasks)
-        model.checkAndSendReminders()
+//        model.checkAndSendReminders()
     }
 
     /** Called when the user selects a course from the spinner */
@@ -229,6 +222,8 @@ class HomeController(private val context: Context, private val model: HomeModel,
     /** Forces a data refresh and reminder check */
     fun refresh() {
         model.loadProgress()
-        model.checkAndSendReminders()
+//        model.checkAndSendReminders()
     }
+
+
 }

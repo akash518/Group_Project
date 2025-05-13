@@ -1,11 +1,6 @@
 package com.example.groupproject
 
-import android.content.Context
 import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -16,7 +11,7 @@ import java.util.Locale
  * Model for Home screen
  * Handles Firebase data fetching, task filtering, progress calculation, and reminder emails.
  */
-class HomeModel(private val context: Context) {
+class HomeModel {
     private lateinit var controller: HomeController
 
     private val auth = FirebaseAuth.getInstance()
@@ -49,7 +44,7 @@ class HomeModel(private val context: Context) {
                 courseProgressList = listOf(CourseProgress("No Courses", 0f))
                 allTasks.clear()
                 CourseColorManager.reset()
-                controller.handleData(courseProgressList, allTasks)
+                controller.handleData(courseProgressList)
                 return@addOnSuccessListener
             }
 
@@ -93,7 +88,7 @@ class HomeModel(private val context: Context) {
                     if (loadedCourses == totalCourses) {
                         Log.d("HomeModel", "Finished loading all courses")
                         courseProgressList = progressList
-                        controller.handleData(courseProgressList, allTasks)
+                        controller.handleData(courseProgressList)
                     }
                 }.addOnFailureListener { e ->
                     controller.handleError("Failed to load tasks: ${e.message}")
@@ -235,8 +230,9 @@ class HomeModel(private val context: Context) {
 
         for (task in tasks) {
             if (!task.isCompleted && task.dueDate != null && task.dueDate.after(now) && task.dueDate.before(nextDay)) {
+                val userId = auth.currentUser?.uid ?: return
                 val taskRef = db.collection("users")
-                    .document("courses")
+                    .document(userId)
                     .collection("courses")
                     .document(task.courseId)
                     .collection("tasks")

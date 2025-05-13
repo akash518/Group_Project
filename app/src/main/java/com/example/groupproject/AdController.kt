@@ -12,7 +12,6 @@ import java.util.*
  */
 class AdController(private val context: Context) {
     private val prefs = context.getSharedPreferences("AdPrefs", Context.MODE_PRIVATE)
-    private lateinit var homeController: HomeController
 
     /**
      * Called on app launch. Shows an ad if the app hasn't been opened yet today.

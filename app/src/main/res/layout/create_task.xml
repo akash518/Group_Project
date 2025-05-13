@@ -57,7 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="Due Date">
+        android:hint="@string/due_date">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/date"
@@ -75,7 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Time">
+        android:hint="@string/time">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/time"

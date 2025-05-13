@@ -61,7 +61,7 @@ class PomodoroActivity : AppCompatActivity() {
                 // Pause
                 timer?.cancel()
                 isTimerRunning = false
-                startButton.text = "Resume"
+                startButton.text = getString(R.string.resume)
             } else {
                 //start from beginning
                 if (remainingTimeInMillis <= 0L) {
@@ -71,13 +71,13 @@ class PomodoroActivity : AppCompatActivity() {
                     timer = PomodoroTimer(remainingTimeInMillis).start()
                     isTimerRunning = true
                 }
-                startButton.text = "Pause"
+                startButton.text = getString(R.string.pause)
             }
         }
         // Reset button resets timer
         resetButton.setOnClickListener {
             timer?.cancel()
-            startButton.text = "Start Pomodoro"
+            startButton.text = getString(R.string.start_pomodoro)
             isTimerRunning = false
             remainingTimeInMillis = durationSelected * 60 * 1000L
             timerText.text = String.format("%02d:00", durationSelected)
@@ -92,13 +92,13 @@ class PomodoroActivity : AppCompatActivity() {
         var durationInMinutes = 0
         if(isWorkSession){
             durationInMinutes = durationSelected
-            status.text = "Work Session"
+            status.text = getString(R.string.work_session)
         }else if (workSessionCount % 4 == 0){ //15 minutes break after 4 study sessions
             durationInMinutes = 15
-            status.text = "Long Break"
+            status.text = getString(R.string.long_break)
         }else{ //5 minute break after each study session
             durationInMinutes = (durationSelected * 0.2).toInt().coerceAtLeast(1)
-            status.text = "Short Break"
+            status.text = getString(R.string.short_break)
         }
         remainingTimeInMillis = durationInMinutes * 60 * 1000L
         timer = PomodoroTimer(remainingTimeInMillis).start()
@@ -154,11 +154,7 @@ class PomodoroActivity : AppCompatActivity() {
      */
     inner class SeekListener : SeekBar.OnSeekBarChangeListener{
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            if (progress < 1) {
-                durationSelected = 1
-            }else{
-                durationSelected = progress
-            }
+            durationSelected = if (progress < 1) { 1 } else{ progress }
             durationText.text = "$durationSelected minutes"
             timerText.text = String.format("%02d:00", durationSelected)
         }
@@ -176,8 +172,8 @@ class PomodoroActivity : AppCompatActivity() {
      * Handles swipe gesture: right to left finishes the activity.
      */
     inner class SwipeGestureListener : GestureDetector.SimpleOnGestureListener() {
-        private val SWIPE_THRESHOLD = 100
-        private val SWIPE_VELOCITY_THRESHOLD = 100
+        private val swipeThreshold = 100
+        private val swipeVelocityThreshold = 100
 
         override fun onFling(
             e1: MotionEvent?,
@@ -189,8 +185,8 @@ class PomodoroActivity : AppCompatActivity() {
             val diffX = e2.x - e1.x
             val diffY = e2.y - e1.y
             if (kotlin.math.abs(diffX) > kotlin.math.abs(diffY) &&
-                kotlin.math.abs(diffX) > SWIPE_THRESHOLD &&
-                kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD
+                kotlin.math.abs(diffX) > swipeThreshold &&
+                kotlin.math.abs(velocityX) > swipeVelocityThreshold
             ) {
                 if (diffX < 0) {
                     finish() //ends activity when user swipes right to left

@@ -37,16 +37,6 @@ object CourseColorManager {
     }
 
     /**
-     * Retrieves the color associated with a given course ID.
-     * Returns light gray if no color is found.
-     * @param courseId - The course identifier
-     * @return Color int value
-     */
-    fun getColor(courseId: String): Int {
-        return courseColors[courseId] ?: Color.LTGRAY
-    }
-
-    /**
      * Returns a copy of all course-color assignments.
      * @return Map of course IDs to color int values
      */

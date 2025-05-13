@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -50,7 +49,7 @@ class TaskCreation(private val context: Context, private val courseList: List<St
         val day = selectedDate.get(Calendar.DAY_OF_MONTH)
         val year = selectedDate.get(Calendar.YEAR)
         date.setText("$month/$day/$year")
-        time.setText("11:59 PM")
+        time.setText(context.getString(R.string._11_59_pm))
 
         val dialog = android.app.AlertDialog.Builder(context)
             .setView(view)
@@ -156,7 +155,7 @@ class TaskCreation(private val context: Context, private val courseList: List<St
         // Hide keyboard if user taps outside EditText field
         dialog.setOnShowListener {
             val root = dialog.window?.decorView?.rootView
-            root?.setOnTouchListener { v, event ->
+            root?.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     val focusedView = dialog.currentFocus
                     if (focusedView is EditText) {
