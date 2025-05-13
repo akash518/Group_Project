@@ -104,7 +104,7 @@
         android:layout_marginEnd="20dp" />
 
     <Button
-        android:layout_width="160dp"
+        android:layout_width="170dp"
         android:layout_height="60dp"
         android:id="@+id/addCourse"
 
@@ -118,7 +118,7 @@
         android:layout_marginTop="10dp" />
 
     <Button
-        android:layout_width="160dp"
+        android:layout_width="170dp"
         android:layout_height="60dp"
         android:id="@+id/createTask"
 
