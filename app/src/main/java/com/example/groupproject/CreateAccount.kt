@@ -130,7 +130,14 @@ class CreateAccount(private val onSuccess: () -> Unit) : DialogFragment() {
                             }
                     }
                     .addOnFailureListener {
-                        Toast.makeText(requireContext(), "Sign-up failed: ${it.message}", Toast.LENGTH_SHORT).show()
+                        //use custom toast to show erro message when signup fails
+                        val layout = layoutInflater.inflate(R.layout.toast, null)
+                        val text = layout.findViewById<TextView>(R.id.toast_text)
+                        text.text = "Sign-up failed: ${it.message}"
+                        val toast = Toast(requireContext())
+                        toast.view = layout
+                        toast.duration = Toast.LENGTH_LONG
+                        toast.show()
                     }
             }
 
