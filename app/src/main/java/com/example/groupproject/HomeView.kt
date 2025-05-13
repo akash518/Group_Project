@@ -17,6 +17,12 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.abs
 
 /**
+ * Akash Shah: 33%
+ * Nihaar Eppe: 33%
+ * Rahaf Alnifie: 33%
+ */
+
+/**
  * View for the Home screen.
  * Initializes UI components, handles user interaction, and communicates with the HomeController.
  */
