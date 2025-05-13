@@ -294,7 +294,7 @@ class HomeView : AppCompatActivity() {
     fun getAdController(): AdController = adController
 
     /**
-     * Automatically hides the soft keyboard when the user taps outside of an EditText field.
+     * Automatically hides the keyboard when the user taps outside of an EditText field.
      * @param ev The motion event (e.g., a tap or swipe)
      * @return Boolean indicating whether the event was consumed
      */
