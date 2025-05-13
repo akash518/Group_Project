@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
@@ -24,6 +25,8 @@ import java.util.*
 class TaskCreation(private val context: Context, private val courseList: List<String>, private val onTaskCreated: () -> Unit) {
     @SuppressLint("ClickableViewAccessibility")
     fun show() {
+        Log.d("TaskCreation", "Context class: ${context::class.java.name}")
+
         val view = LayoutInflater.from(context).inflate(R.layout.create_task, null)
 
         val task = view.findViewById<EditText>(R.id.taskName)
