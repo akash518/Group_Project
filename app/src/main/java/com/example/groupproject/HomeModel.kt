@@ -207,15 +207,18 @@ class HomeModel(private val context: Context) {
     }
 
     fun checkAndSendReminders() {
-        val now = currentStartDate.time
-        val nextDay = (currentStartDate.clone() as Calendar).apply { add(Calendar.HOUR_OF_DAY, 24) }.time
+        Log.d("ReminderDebug", "Sending checkAndSendReminders() from stack: ", Throwable())
+        val now = Calendar.getInstance().time
+        val nextDay = Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 24) }.time
+
         val userEmail = auth.currentUser?.email?: return
         val tasks = getFilteredTasks(null).tasks
 
         for (task in tasks) {
             if (!task.isCompleted && task.dueDate != null && task.dueDate.after(now) && task.dueDate.before(nextDay)) {
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
                 val taskRef = db.collection("users")
-                    .document("courses")
+                    .document(userId)
                     .collection("courses")
                     .document(task.courseId)
                     .collection("tasks")

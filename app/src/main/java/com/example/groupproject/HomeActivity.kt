@@ -542,6 +542,7 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        Log.d("ReminderDebug", "onResume triggered")
 
         val selected = courseSpinner.selectedItem?.toString() ?: "All Courses"
         val selectedId = if (selected == "All Courses") null else selected

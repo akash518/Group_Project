@@ -85,6 +85,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
     fun handleData(courses: List<CourseProgress>, tasks: List<Task>) {
         updateSpinner(courses)
         updateView()
+        model.checkAndSendReminders()
     }
 
     fun handleError(message: String) {
@@ -124,7 +125,7 @@ class HomeController(private val context: Context, private val model: HomeModel,
             totalCount = filteredData.total
         )
         view.updateTaskList(filteredData.tasks)
-        model.checkAndSendReminders()
+//        model.checkAndSendReminders()
     }
 
     private fun onAuthSuccess() {
@@ -201,6 +202,8 @@ class HomeController(private val context: Context, private val model: HomeModel,
 
     fun refresh() {
         model.loadProgress()
-        model.checkAndSendReminders()
+//        model.checkAndSendReminders()
     }
+
+
 }
