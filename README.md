@@ -86,13 +86,13 @@
 app/src/main/java/com/example/groupproject/
 │
 ├── // Activities
-├── HomeView.kt                    # Main screen with MVC pattern
-├── PomodoroActivity.kt           # Pomodoro timer feature
-├── FullTaskViewActivity.kt       # All tasks view
+├── HomeView.kt                  # Main screen with MVC pattern
+├── PomodoroActivity.kt          # Pomodoro timer feature
+├── FullTaskViewActivity.kt      # All tasks view
 ├── ManageCourses.kt             # Course management screen
 │
 ├── // Controllers
-├── HomeController.kt             # Main screen logic controller
+├── HomeController.kt            # Main screen logic controller
 ├── AdController.kt              # Ad display management
 │
 ├── // Models
@@ -149,12 +149,6 @@ cd task-tracker
 ```bash
 ./gradlew assembleDebug
 ```
-
-## 📱 Screenshots
-
-| Home Screen | Create Task | Pomodoro Timer |
-|-------------|-------------|----------------|
-| Task overview with progress rings | Add new assignments easily | Built-in study timer |
 
 ## 🎯 Key Functionalities
 
@@ -214,5 +208,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions or support, please create an issue:
 - GitHub Issues: [Create an issue](https://github.com/yourusername/task-tracker/issues)
-
 ---
