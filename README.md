@@ -83,38 +83,35 @@
 ## 📂 Project Structure
 
 ```
-com.example.groupproject/
-├── 📱 Activities/
-│   ├── HomeView.kt           # Main screen with MVC pattern
-│   ├── PomodoroActivity.kt   # Pomodoro timer feature
-│   ├── FullTaskViewActivity.kt # All tasks view
-│   └── ManageCourses.kt      # Course management screen
+app/src/main/java/com/example/groupproject/
 │
-├── 🎮 Controllers/
-│   ├── HomeController.kt     # Main screen logic controller
-│   └── AdController.kt       # Ad display management
+├── // Activities
+├── HomeView.kt                    # Main screen with MVC pattern
+├── PomodoroActivity.kt           # Pomodoro timer feature
+├── FullTaskViewActivity.kt       # All tasks view
+├── ManageCourses.kt             # Course management screen
 │
-├── 📊 Models/
-│   └── HomeModel.kt          # Data management and business logic
+├── // Controllers
+├── HomeController.kt             # Main screen logic controller
+├── AdController.kt              # Ad display management
 │
-├── 🔧 Utilities/
-│   ├── EmailUtils.kt         # Email reminder functionality
-│   ├── CourseColorManager.kt # Course color management
-│   └── AdManager.kt          # Ad loading and display
+├── // Models
+├── HomeModel.kt                 # Data management and business logic
 │
-├── 🎨 UI Components/
-│   ├── ProgressView.kt       # Custom circular progress view
-│   ├── TaskAdapter.kt        # RecyclerView adapter for tasks
-│   └── CourseAdapter.kt      # RecyclerView adapter for courses
+├── // Utilities
+├── EmailUtils.kt                # Email reminder functionality
+├── CourseColorManager.kt        # Course color management
+├── AdManager.kt                 # Ad loading and display
 │
-├── 📝 Dialogs/
-│   ├── CreateAccount.kt      # Login/Signup dialog
-│   ├── CourseCreation.kt     # Add course dialog
-│   └── TaskCreation.kt       # Create task dialog
+├── // UI Components/Adapters
+├── ProgressView.kt              # Custom circular progress view
+├── TaskAdapter.kt               # RecyclerView adapter for tasks
+├── CourseAdapter.kt             # RecyclerView adapter for courses
 │
-└── 📦 Data Classes/
-    ├── Task.kt              # Task data model
-    └── CourseProgress.kt    # Course progress model
+├── // Dialogs
+├── CreateAccount.kt             # Login/Signup dialog
+├── CourseCreation.kt            # Add course dialog
+└── TaskCreation.kt              # Create task dialog
 ```
 
 ## 🚀 Getting Started
