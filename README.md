@@ -3,12 +3,12 @@
   A modern Android task management app that helps students organize their courses, track assignments, and boost productivity with integrated study tools.
 </p>
 
-> A modern Android task management app that helps students organize their courses, track assignments, and boost productivity with integrated study tools.
-
+<p align="center">
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Firebase](https://img.shields.io/badge/firebase-%23039BE5.svg?style=for-the-badge&logo=firebase)
 ![Material Design](https://img.shields.io/badge/Material%20Design-757575?style=for-the-badge&logo=material-design&logoColor=white)
+</p>
 
 ## 🌟 Features
 
