@@ -1,4 +1,7 @@
-# 📚 Task Tracker
+<h1 align="center">📚 Task Tracker</h1>
+<p align="center">
+  <em>A modern Android task management app that helps students organize their courses, track assignments, and boost productivity with integrated study tools.</em>
+</p>
 
 > A modern Android task management app that helps students organize their courses, track assignments, and boost productivity with integrated study tools.
 
